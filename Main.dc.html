@@ -13,54 +13,59 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#EEF0F3}
-a{color:#1168BD}a:hover{color:#08427B}
-.app{font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1B1F27;display:flex;flex-direction:column;height:100vh;min-height:640px;background:#EEF0F3;box-sizing:border-box}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:#FFFFFF;border-bottom:1px solid #D7DBE1;min-height:52px;box-sizing:border-box}
+/* Themes: the app is styled only through these tokens; C4 element colours (.k-*) are the same in every theme. */
+:root,:root[data-theme="light"]{--scheme:light;--bg:#EEF0F3;--surface:#FFFFFF;--surface-2:#FBFBFC;--subtle:#F2F4F7;--gutter:#F1F3F6;--line:#D7DBE1;--line-2:#E3E6EB;--ctl-line:#C9CED6;--text:#1B1F27;--text-2:#3B4250;--muted:#5A6170;--link:#1168BD;--link-hover:#08427B;--accent:#1168BD;--hl:#E3EEFB;--err-bg:#FEF3F2;--err:#B42318;--err-line:#F3B8B2;--err-text:#7A271A;--ok:#067647;--warn:#93370D;--sel:#F59E0B;--sel-bg:#FEF3C7;--edge-sel:#D97706;--grid-dot:#C3C8D1;--edge:#5B6576;--bound:#7B8494;--bound-2:#8E97A6;--bound-fill:rgba(255,255,255,.35);--bound-fill-2:rgba(255,255,255,.45);--label-hover:rgba(255,255,255,.85)}
+:root[data-theme="dark"]{--scheme:dark;--bg:#0F1216;--surface:#171B21;--surface-2:#13171C;--subtle:#222831;--gutter:#1C2128;--line:#2C333D;--line-2:#252B34;--ctl-line:#3A424E;--text:#E6E9EE;--text-2:#B8BFCA;--muted:#8A93A1;--link:#6FB1F5;--link-hover:#A9D0FA;--accent:#4C9AEA;--hl:#17304D;--err-bg:#3A1715;--err:#F97066;--err-line:#7A2E27;--err-text:#FECDCA;--ok:#47CD89;--warn:#FDB022;--sel:#F59E0B;--sel-bg:#4A3A12;--edge-sel:#F79009;--grid-dot:#2C333D;--edge:#8A93A1;--bound:#6B7584;--bound-2:#5A6370;--bound-fill:rgba(255,255,255,.03);--bound-fill-2:rgba(255,255,255,.05);--label-hover:rgba(23,27,33,.9)}
+:root[data-theme="blueprint"]{--scheme:dark;--bg:#0F2747;--surface:#133158;--surface-2:#112C50;--subtle:#1B3D69;--gutter:#163660;--line:#2A4F80;--line-2:#224675;--ctl-line:#3A6399;--text:#FFFFFF;--text-2:#CFE0F5;--muted:#9DB7D8;--link:#FFD08A;--link-hover:#FFE3B8;--accent:#FFB347;--hl:#1E4A80;--err-bg:#4A1E2A;--err:#FF8A80;--err-line:#8A3A44;--err-text:#FFD3CF;--ok:#7EE2A8;--warn:#FFC56B;--sel:#FFB347;--sel-bg:#5A4520;--edge-sel:#FFB347;--grid-dot:#2A4F80;--edge:#CFE0F5;--bound:#9DB7D8;--bound-2:#7F9DC4;--bound-fill:rgba(255,255,255,.04);--bound-fill-2:rgba(255,255,255,.06);--label-hover:rgba(19,49,88,.9)}
+:root[data-theme="warm"]{--scheme:light;--bg:#F5F0E6;--surface:#FFFDF8;--surface-2:#FBF7EF;--subtle:#EFE7D8;--gutter:#F1EADC;--line:#DDD2BF;--line-2:#E8DFCF;--ctl-line:#CDBFA7;--text:#2A1E16;--text-2:#4A3A2E;--muted:#7A6A5C;--link:#A2452A;--link-hover:#7A2E1C;--accent:#C8642B;--hl:#F7E3D3;--err-bg:#FCEBE6;--err:#A8321E;--err-line:#EBB5A8;--err-text:#6E2414;--ok:#3F7A2E;--warn:#93370D;--sel:#E0802B;--sel-bg:#FBE6CF;--edge-sel:#B85A1F;--grid-dot:#D8CCB6;--edge:#6E5E50;--bound:#9A8A78;--bound-2:#AD9E8B;--bound-fill:rgba(255,255,255,.35);--bound-fill-2:rgba(255,255,255,.45);--label-hover:rgba(255,253,248,.9)}
+body{margin:0;background:var(--bg);color-scheme:var(--scheme)}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+.app{font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--text);display:flex;flex-direction:column;height:100vh;min-height:640px;background:var(--bg);box-sizing:border-box}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);min-height:52px;box-sizing:border-box}
 .main{flex:1;min-height:0;display:flex;flex-wrap:wrap}
-.pane-md{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;background:#FBFBFC;border-right:1px solid #D7DBE1}
+.pane-md{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;background:var(--surface-2);border-right:1px solid var(--line)}
 .pane-dia{flex:999 1 640px;min-width:0;display:flex;flex-direction:column}
-.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #D7DBE1;background:#FFFFFF;min-height:52px;box-sizing:border-box}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);min-height:52px;box-sizing:border-box}
 .bar-title{font-weight:600;font-size:14px;margin-right:auto;display:flex;align-items:center;gap:8px}
-.bar-title span{font-weight:400;color:#5A6170;font-size:12px}
+.bar-title span{font-weight:400;color:var(--muted);font-size:12px}
 .model-title{font-weight:600;font-size:15px;margin-right:8px}
 .grow{flex:1}
-.sep{width:1px;height:24px;background:#D7DBE1;margin:0 4px}
-.add-l{font-size:12px;color:#5A6170;font-weight:500}
-.btn{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border:1px solid #C9CED6;border-radius:6px;background:#FFFFFF;color:#1B1F27;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;white-space:nowrap}
-.btn:hover{background:#F2F4F7}
+.sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+.add-l{font-size:12px;color:var(--muted);font-weight:500}
+.btn{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border:1px solid var(--ctl-line);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;white-space:nowrap}
+.btn:hover{background:var(--subtle)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.btn.danger{color:#B42318;border-color:#F3B8B2}
+.btn.danger{color:var(--err);border-color:var(--err-line)}
 .btn.icon{width:36px;padding:0;justify-content:center}
-.seg{display:inline-flex;border:1px solid #C9CED6;border-radius:8px;padding:2px;gap:2px;background:#F2F4F7}
-.seg button{font:inherit;font-size:13px;min-height:32px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:#3B4250;cursor:pointer}
-.seg button.on{background:#1B1F27;color:#FFFFFF}
+.seg{display:inline-flex;border:1px solid var(--ctl-line);border-radius:8px;padding:2px;gap:2px;background:var(--subtle)}
+.seg button{font:inherit;font-size:13px;min-height:32px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--text-2);cursor:pointer}
+.seg button.on{background:var(--text);color:var(--surface)}
 .ed{position:relative;flex:1;min-height:280px;overflow:hidden;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;line-height:20px}
-.ed-gutter{position:absolute;left:0;top:0;bottom:0;width:44px;background:#F1F3F6;border-right:1px solid #E3E6EB}
+.ed-gutter{position:absolute;left:0;top:0;bottom:0;width:44px;background:var(--gutter);border-right:1px solid var(--line-2)}
 .ed-back{position:absolute;left:0;right:0;top:0;padding-top:12px;pointer-events:none}
 .ln{height:20px;display:flex}
-.ln-n{width:44px;flex:none;text-align:right;padding-right:10px;box-sizing:border-box;color:#6B7280;font-size:11px}
-.ln.hl{background:#E3EEFB}
-.ln.hl .ln-n{color:#08427B;font-weight:500}
-.ln.err{background:#FDE7E7}
-.ln.err .ln-n{color:#B42318;font-weight:500}
-.ta{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;margin:0;border:0;outline:none;resize:none;background:transparent;padding:12px 12px 12px 56px;font:inherit;color:#1B1F27;white-space:pre;overflow:auto;caret-color:#1168BD;tab-size:2}
+.ln-n{width:44px;flex:none;text-align:right;padding-right:10px;box-sizing:border-box;color:var(--muted);font-size:11px}
+.ln.hl{background:var(--hl)}
+.ln.hl .ln-n{color:var(--link-hover);font-weight:500}
+.ln.err{background:var(--err-bg)}
+.ln.err .ln-n{color:var(--err);font-weight:500}
+.ta{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;margin:0;border:0;outline:none;resize:none;background:transparent;padding:12px 12px 12px 56px;font:inherit;color:var(--text);white-space:pre;overflow:auto;caret-color:var(--accent);tab-size:2}
 .body{flex:1;min-height:0;display:flex;flex-wrap:wrap}
 .stage{position:relative;flex:999 1 420px;min-width:0;min-height:360px;display:flex}
-.vp{position:relative;flex:1;overflow:auto;background:#EEF0F3;outline:none}
-.vp:focus-visible{box-shadow:inset 0 0 0 2px #1168BD}
+.vp{position:relative;flex:1;overflow:auto;background:var(--bg);outline:none}
+.vp:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .sizer{position:relative}
 .host{position:absolute;left:0;top:0;transform-origin:0 0}
-.host.grid{background-image:radial-gradient(#C3C8D1 1px,transparent 1px);background-size:24px 24px}
+.host.grid{background-image:radial-gradient(var(--grid-dot) 1px,transparent 1px);background-size:24px 24px}
 .host.stale{opacity:.45;filter:grayscale(.7)}
-.banner{position:absolute;left:12px;right:12px;top:12px;z-index:5;padding:10px 14px;background:#FEF3F2;border:1px solid #F3B8B2;color:#7A271A;border-radius:8px;font-size:13px;line-height:18px}
-.empty{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:4;max-width:380px;text-align:center;color:#3B4250;font-size:14px;line-height:21px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.empty code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#FFFFFF;padding:2px 6px;border-radius:4px;border:1px solid #D7DBE1}
+.banner{position:absolute;left:12px;right:12px;top:12px;z-index:5;padding:10px 14px;background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-text);border-radius:8px;font-size:13px;line-height:18px}
+.empty{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:4;max-width:380px;text-align:center;color:var(--text-2);font-size:14px;line-height:21px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--surface);padding:2px 6px;border-radius:4px;border:1px solid var(--line)}
 .node{position:absolute;box-sizing:border-box;border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;color:#FFFFFF;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 1px 2px rgba(16,24,40,.2),0 2px 8px rgba(16,24,40,.08)}
 .app.present .node{cursor:pointer}
 .node.kids{padding-bottom:30px}
-.node.sel{outline:3px solid #F59E0B;outline-offset:3px}
+.node.sel{outline:3px solid var(--sel);outline-offset:3px}
 .node.dim{opacity:.45}
 .node .nm{font-weight:600;font-size:15px;line-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .node .ty{font-size:11px;line-height:14px;opacity:.92}
@@ -79,73 +84,98 @@ a{color:#1168BD}a:hover{color:#08427B}
 .k-queue{background:#3478C6;border-radius:16% / 50%}
 .k-component{background:#85BBF0;color:#0B2545}
 .head{position:absolute;top:-40px;left:50%;width:48px;height:48px;margin-left:-24px;border-radius:50%;background:inherit;box-shadow:0 1px 2px rgba(16,24,40,.2)}
-.handle{position:absolute;right:-10px;top:50%;margin-top:-10px;width:20px;height:20px;border-radius:50%;border:2px solid #FFFFFF;background:#F59E0B;padding:0;cursor:crosshair;opacity:0;touch-action:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.handle{position:absolute;right:-10px;top:50%;margin-top:-10px;width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);background:var(--sel);padding:0;cursor:crosshair;opacity:0;touch-action:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .node:hover .handle,.node.sel .handle{opacity:1}
 .app.present .handle{display:none}
-.bound{position:absolute;border:2px dashed #7B8494;border-radius:12px;pointer-events:none;box-sizing:border-box;background:rgba(255,255,255,.35)}
-.bound.d2{background:rgba(255,255,255,.45);border-color:#8E97A6}
-.bound.sel{border-color:#F59E0B}
-.bound-label{position:absolute;display:flex;align-items:center;gap:6px;font-size:14px;line-height:18px;color:#2B313C;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:4px 6px 4px 8px;border-radius:6px;white-space:nowrap}
+.bound{position:absolute;border:2px dashed var(--bound);border-radius:12px;pointer-events:none;box-sizing:border-box;background:var(--bound-fill)}
+.bound.d2{background:var(--bound-fill-2);border-color:var(--bound-2)}
+.bound.sel{border-color:var(--sel)}
+.bound-label{position:absolute;display:flex;align-items:center;gap:6px;font-size:14px;line-height:18px;color:var(--text);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:4px 6px 4px 8px;border-radius:6px;white-space:nowrap}
 .app.present .bound-label{cursor:pointer}
-.bound-label:hover{background:rgba(255,255,255,.85)}
-.bound-label.sel{background:#FEF3C7}
-.bound-label span{color:#5A6170;font-size:11px}
-.collapse{font:inherit;font-size:11px;line-height:14px;padding:3px 8px;border-radius:10px;border:1px solid #C9CED6;background:#FFFFFF;color:#3B4250;cursor:pointer}
-.collapse:hover{background:#F2F4F7}
+.bound-label:hover{background:var(--label-hover)}
+.bound-label.sel{background:var(--sel-bg)}
+.bound-label span{color:var(--muted);font-size:11px}
+.collapse{font:inherit;font-size:11px;line-height:14px;padding:3px 8px;border-radius:10px;border:1px solid var(--ctl-line);background:var(--surface);color:var(--text-2);cursor:pointer}
+.collapse:hover{background:var(--subtle)}
 svg.edge{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-.e-line{fill:none;stroke:#5B6576;stroke-width:1.5;stroke-dasharray:6 4}
-.e-head{fill:#5B6576;stroke:none}
+.e-line{fill:none;stroke:var(--edge);stroke-width:1.5;stroke-dasharray:6 4}
+.e-head{fill:var(--edge);stroke:none}
 .e-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
 svg.edge.multi .e-line{stroke-width:2.5}
-svg.edge.sel .e-line{stroke:#D97706;stroke-width:2.5;stroke-dasharray:none}
-svg.edge.sel .e-head{fill:#D97706}
+svg.edge.sel .e-line{stroke:var(--edge-sel);stroke-width:2.5;stroke-dasharray:none}
+svg.edge.sel .e-head{fill:var(--edge-sel)}
 svg.edge.dim{opacity:.18}
-.elabel{position:absolute;transform:translate(-50%,-50%);background:#EEF0F3;padding:2px 6px;border-radius:4px;font-size:12px;line-height:15px;text-align:center;color:#2B313C;max-width:180px;cursor:pointer;user-select:none;-webkit-user-select:none}
-.elabel .tech{display:block;font-size:11px;color:#5A6170}
+.elabel{position:absolute;transform:translate(-50%,-50%);background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;line-height:15px;text-align:center;color:var(--text);max-width:180px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.elabel .tech{display:block;font-size:11px;color:var(--muted)}
 .elabel.multi{font-weight:600}
-.elabel.sel{background:#FEF3C7}
+.elabel.sel{background:var(--sel-bg)}
 .elabel.dim{opacity:.25}
 svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-.ghost-line{fill:none;stroke:#D97706;stroke-width:2;stroke-dasharray:4 4}
-.card{position:absolute;left:16px;bottom:16px;z-index:6;width:320px;max-width:calc(100% - 32px);box-sizing:border-box;background:#FFFFFF;border:1px solid #D7DBE1;border-radius:10px;padding:14px 16px;box-shadow:0 4px 16px rgba(16,24,40,.12);display:flex;flex-direction:column;gap:6px}
+.ghost-line{fill:none;stroke:var(--edge-sel);stroke-width:2;stroke-dasharray:4 4}
+.card{position:absolute;left:16px;bottom:16px;z-index:6;width:320px;max-width:calc(100% - 32px);box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:0 4px 16px rgba(16,24,40,.12);display:flex;flex-direction:column;gap:6px}
 .card-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
-.card .ty{font-size:12px;color:#5A6170}
-.card p{margin:0;font-size:13px;line-height:19px;color:#2B313C}
-.insp{flex:1 1 300px;max-width:100%;border-left:1px solid #D7DBE1;background:#FFFFFF;overflow:auto;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;min-height:0}
+.card .ty{font-size:12px;color:var(--muted)}
+.card p{margin:0;font-size:13px;line-height:19px;color:var(--text)}
+.insp{flex:1 1 300px;max-width:100%;border-left:1px solid var(--line);background:var(--surface);overflow:auto;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;min-height:0}
 .insp-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
 .fld{display:flex;flex-direction:column;gap:6px}
-.lbl,.fld label{font-size:12px;font-weight:600;color:#3B4250}
-.inp{font:inherit;font-size:14px;min-height:36px;padding:0 10px;border:1px solid #C9CED6;border-radius:6px;background:#FFFFFF;color:#1B1F27;box-sizing:border-box;width:100%}
+.lbl,.fld label{font-size:12px;font-weight:600;color:var(--text-2)}
+.inp{font:inherit;font-size:14px;min-height:36px;padding:0 10px;border:1px solid var(--ctl-line);border-radius:6px;background:var(--surface);color:var(--text);box-sizing:border-box;width:100%}
 .inp.mono{font-family:'IBM Plex Mono',monospace;font-size:13px}
-.inp:focus{outline:2px solid #1168BD;outline-offset:-1px;border-color:#1168BD}
-.inp.bad{border-color:#B42318;outline-color:#B42318}
-.inp:disabled{background:#F2F4F7}
-.ferr{font-size:12px;color:#B42318}
-.path{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#F1F3F6;padding:6px 8px;border-radius:4px;color:#2B313C;word-break:break-all}
+.inp:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.inp.bad{border-color:var(--err);outline-color:var(--err)}
+.inp:disabled{background:var(--subtle)}
+.ferr{font-size:12px;color:var(--err)}
+.path{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gutter);padding:6px 8px;border-radius:4px;color:var(--text);word-break:break-all}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font:inherit;font-size:12px;min-height:32px;padding:0 10px;border-radius:16px;border:1px solid #C9CED6;background:#FFFFFF;color:#1B1F27;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
-.chip:hover{background:#F2F4F7}
-.chip.on{background:#1B1F27;color:#FFFFFF;border-color:#1B1F27}
+.chip{font:inherit;font-size:12px;min-height:32px;padding:0 10px;border-radius:16px;border:1px solid var(--ctl-line);background:var(--surface);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
+.chip:hover{background:var(--subtle)}
+.chip.on{background:var(--text);color:var(--surface);border-color:var(--text)}
 .chip:disabled{opacity:.45;cursor:not-allowed}
 .sw{width:12px;height:12px;border-radius:3px !important;display:inline-block;flex:none}
 .rels{display:flex;flex-direction:column;gap:4px}
-.rel-row{display:flex;align-items:center;gap:6px;min-height:36px;border:1px solid #E3E6EB;border-radius:6px;padding:0 4px 0 0}
-.rel-go{font:inherit;font-size:13px;flex:1;min-width:0;min-height:34px;text-align:left;border:0;background:transparent;cursor:pointer;padding:0 8px;color:#1B1F27;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:6px}
-.rel-go:hover{background:#F2F4F7}
-.rel-go span{color:#5A6170}
-.x{width:28px;height:28px;border:0;background:transparent;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#5A6170;padding:0;flex:none}
-.x:hover{background:#FEF3F2;color:#B42318}
+.rel-row{display:flex;align-items:center;gap:6px;min-height:36px;border:1px solid var(--line-2);border-radius:6px;padding:0 4px 0 0}
+.rel-go{font:inherit;font-size:13px;flex:1;min-width:0;min-height:34px;text-align:left;border:0;background:transparent;cursor:pointer;padding:0 8px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:6px}
+.rel-go:hover{background:var(--subtle)}
+.rel-go span{color:var(--muted)}
+.x{width:28px;height:28px;border:0;background:transparent;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);padding:0;flex:none}
+.x:hover{background:var(--err-bg);color:var(--err)}
 .x:disabled{opacity:.45;cursor:not-allowed}
 .x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.muted{color:#5A6170;font-size:13px;line-height:19px;margin:0}
-.help{margin:0;padding-left:18px;color:#3B4250;font-size:13px;line-height:20px;display:flex;flex-direction:column;gap:6px}
-.help code,.muted code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#F1F3F6;padding:1px 4px;border-radius:3px}
-.status{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:6px 12px;font-size:12px;line-height:18px;border-top:1px solid #D7DBE1;background:#FFFFFF;color:#3B4250;min-height:32px;box-sizing:border-box}
-.status .ok{color:#067647;font-weight:500}
-.status .bad{color:#B42318;font-weight:500}
-.status .warn{color:#93370D}
+.muted{color:var(--muted);font-size:13px;line-height:19px;margin:0}
+.help{margin:0;padding-left:18px;color:var(--text-2);font-size:13px;line-height:20px;display:flex;flex-direction:column;gap:6px}
+.help code,.muted code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--gutter);padding:1px 4px;border-radius:3px}
+.status{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:6px 12px;font-size:12px;line-height:18px;border-top:1px solid var(--line);background:var(--surface);color:var(--text-2);min-height:32px;box-sizing:border-box}
+.status .ok{color:var(--ok);font-weight:500}
+.status .bad{color:var(--err);font-weight:500}
+.status .warn{color:var(--warn)}
+.theme-picker{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid var(--line);border-radius:10px}
+.theme-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 6px 0 8px}
+.theme-btn{font:inherit;display:inline-flex;align-items:center;gap:8px;min-height:36px;min-width:36px;padding:0 8px;border-radius:7px;border:0;background:transparent;color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+.theme-btn:hover{background:var(--subtle)}
+.theme-btn.on{background:var(--line)}
+.theme-swatch{position:relative;width:20px;height:20px;border-radius:50%;overflow:hidden;box-shadow:inset 0 0 0 1.5px var(--muted);flex:none}
+.theme-btn.on .theme-swatch{box-shadow:inset 0 0 0 1.5px var(--text)}
+.theme-swatch>span{position:absolute;right:0;top:0;width:10px;height:20px}
+.theme-swatch>i{position:absolute;left:4px;bottom:4px;width:5px;height:5px;border-radius:50%}
+.main.split{flex-wrap:nowrap}
+.main.split .pane-md{flex-grow:0;flex-shrink:0;border-right:0}
+.main.split .pane-dia{flex-basis:0}
+.splitter{flex:none;width:6px;cursor:col-resize;background:var(--line);touch-action:none;outline:none}
+.splitter:hover,.splitter:focus-visible,.splitter.on{background:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.modal{border:1px solid var(--line);border-radius:12px;padding:0;width:min(520px,calc(100vw - 32px));background:var(--surface);color:var(--text);font-family:'IBM Plex Sans',system-ui,sans-serif;box-shadow:0 12px 40px rgba(16,24,40,.25)}
+.modal::backdrop{background:rgba(16,24,40,.45)}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:16px}
+.modal-h{display:flex;align-items:center;gap:8px}
+.modal-h h2{margin:0 auto 0 0;font-size:17px;font-weight:600}
+.drop{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 16px;border:2px dashed var(--ctl-line);border-radius:10px;background:var(--surface-2);color:var(--text-2);font-size:13px;text-align:center}
+.drop.on{border-color:var(--accent);background:var(--hl)}
+.drop>svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.row{display:flex;gap:8px}
+.alert{padding:10px 14px;background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-text);border-radius:8px;font-size:13px;line-height:18px}
 @media (pointer:coarse){.btn,.inp{min-height:44px}.seg button{min-height:40px}.chip{min-height:40px}.handle{width:30px;height:30px;right:-15px;margin-top:-15px;opacity:1}}
-@media (max-width:860px){.app{height:auto}.pane-md{flex-basis:100%;height:50vh;border-right:0;border-bottom:1px solid #D7DBE1}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid #D7DBE1}}
+@media (max-width:860px){.app{height:auto}.main.split{flex-wrap:wrap}.splitter{display:none}.pane-md{flex-basis:100% !important;height:50vh;border-right:0;border-bottom:1px solid var(--line)}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid var(--line)}}
 </style>
 </helmet>
 <div class="{{appCls}}" onKeyDown="{{onKeyDown}}">
@@ -154,21 +184,45 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <button class="btn icon" onClick="{{onUndo}}" disabled="{{noUndo}}" aria-label="Undo" title="Undo (Ctrl/⌘+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
 <button class="btn icon" onClick="{{onRedo}}" disabled="{{noRedo}}" aria-label="Redo" title="Redo (Ctrl/⌘+Shift+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
 <div class="sep"></div>
+<button class="btn icon" onClick="{{onOpenShow}}" aria-label="Open" title="Open a file or URL"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></button>
+<button class="btn icon" onClick="{{onDownload}}" aria-label="Download markdown" title="Download {{fileName}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg></button>
+<button class="btn icon" onClick="{{onSave}}" aria-label="Save" title="Save to a file (Ctrl/⌘+S)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M7 3v5h8V3"></path><rect x="7" y="13" width="10" height="8"></rect></svg></button>
+<div class="sep"></div>
 <div class="seg" role="group" aria-label="View"><button class="{{viewSourceCls}}" onClick="{{onViewSource}}">Source</button><button class="{{viewSplitCls}}" onClick="{{onViewSplit}}">Split</button><button class="{{viewChartCls}}" onClick="{{onViewChart}}">Chart</button></div>
 <sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
 <div class="seg" role="group" aria-label="Mode"><button class="{{presentCls}}" onClick="{{onPresent}}">Present</button><button class="{{editCls}}" onClick="{{onEdit}}">Edit</button></div>
 </sc-if>
 <span class="model-title">{{modelTitle}}</span>
+<div class="grow"></div>
+<div class="theme-picker" role="group" aria-label="Theme"><span class="theme-label">Theme</span><sc-for list="{{themes}}" as="t" hint-placeholder-count="4"><button class="{{t.cls}}" aria-pressed="{{t.on}}" aria-label="{{t.label}} theme" title="{{t.label}}" onClick="{{t.pick}}"><span class="theme-swatch" aria-hidden="true" style="background: {{t.bg}}"><span style="background: {{t.primary}}"></span><i style="background: {{t.accent}}"></i></span><sc-if value="{{t.on}}" hint-placeholder-val="{{ false }}"><span>{{t.label}}</span></sc-if></button></sc-for></div>
 </div>
 
-<div class="main">
+<sc-if value="{{openDlg}}" hint-placeholder-val="{{ false }}">
+<dialog class="modal" aria-labelledby="open-h" onCancel="{{onOpenCancel}}" onClick="{{onOpenBackdrop}}">
+<div class="modal-body">
+<div class="modal-h"><h2 id="open-h">Open a C4 markdown file</h2><button class="x" onClick="{{onOpenHide}}" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="{{dropCls}}" onDragOver="{{onDragOver}}" onDragLeave="{{onDragLeave}}" onDrop="{{onDrop}}">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"></path><path d="M7 8l5-5 5 5"></path><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path></svg>
+<span>Drop a .md file here, or</span>
+<label class="btn">Choose file…<input type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" onChange="{{onImport}}" style="display: none"></label>
+</div>
+<form class="fld" onSubmit="{{onOpenUrl}}">
+<label for="open-url">Or open from a URL</label>
+<div class="row"><input id="open-url" type="url" class="inp mono" placeholder="https://…/architecture.md" value="{{openUrl}}" onChange="{{onOpenUrlChange}}"><button type="submit" class="btn primary" disabled="{{noOpenUrl}}">{{openUrlLabel}}</button></div>
+<p class="muted">The address bar then links to it with <code>?src=</code>, so you can share it. Files from another site must allow CORS (GitHub Pages and raw.githubusercontent.com do).</p>
+</form>
+<sc-if value="{{hasOpenErr}}" hint-placeholder-val="{{ false }}"><div class="alert" role="alert">{{openErr}}</div></sc-if>
+<div><button class="btn" onClick="{{onReset}}">Load the sample instead</button></div>
+</div>
+</dialog>
+</sc-if>
+
+<div class="{{mainCls}}">
 <sc-if value="{{showSource}}" hint-placeholder-val="{{ false }}">
-<section class="pane-md" aria-label="Markdown source">
+<section class="pane-md" aria-label="Markdown source" style="flex-basis: {{mdW}}px">
 <div class="bar">
-<div class="bar-title">architecture.md <span>source of truth</span></div>
-<button class="btn" onClick="{{onCopy}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>Copy</button>
-<label class="btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>Import .md<input type="file" accept=".md,.markdown,text/markdown,text/plain" onChange="{{onImport}}" style="display: none"></label>
-<button class="btn" onClick="{{onReset}}">Load sample</button>
+<div class="bar-title">{{fileName}} <span>source of truth</span></div>
+<button class="btn" onClick="{{onCopy}}" title="Copy the markdown to the clipboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>{{copyLabel}}</button>
 </div>
 <div class="ed">
 <div class="ed-gutter"></div>
@@ -180,6 +234,10 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <textarea class="ta" wrap="off" spellcheck="false" aria-label="Markdown source" value="{{md}}" onChange="{{onMdChange}}" onSelect="{{onCaret}}" onClick="{{onCaret}}" onScroll="{{onTaScroll}}"></textarea>
 </div>
 </section>
+</sc-if>
+
+<sc-if value="{{isSplit}}" hint-placeholder-val="{{ false }}">
+<div class="splitter" role="separator" aria-orientation="vertical" aria-label="Resize markdown pane" aria-valuenow="{{mdW}}" tabIndex="0" title="Drag to resize; double-click to reset" onPointerDown="{{onSplitDown}}" onPointerMove="{{onSplitMove}}" onPointerUp="{{onSplitUp}}" onPointerCancel="{{onSplitUp}}" onDoubleClick="{{onSplitReset}}" onKeyDown="{{onSplitKey}}"></div>
 </sc-if>
 
 <sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
@@ -376,6 +434,8 @@ class Component extends DCLogic {
    *                         Elements without a line are auto-placed and flagged "auto".
    *
    *   # <anything else>    prose, kept verbatim (as is text before the first "#").
+   *
+   *   The full format, with examples, is in spec.md.
    *
    *   Typing in the markdown never rewrites it. A diagram edit rewrites the markdown in
    *   this canonical form. A parse error is shown with its line and diagram editing pauses
@@ -1062,17 +1122,88 @@ class Component extends DCLogic {
   })();
 
   static STORAGE_KEY = 'c4-markdown-viewer:v2';
+  static THEME_KEY = 'c4-markdown-viewer:theme';
+  static SPLIT_KEY = 'c4-markdown-viewer:split';
+  static MD_W = 380;
+  // Ids map to :root[data-theme] blocks in the styles; swatch colours are for the picker only.
+  static THEMES = Object.freeze([
+    { id: 'light', label: 'Light', bg: '#EEF0F3', primary: '#1B1F27', accent: '#1168BD' },
+    { id: 'dark', label: 'Dark', bg: '#0F1216', primary: '#E6E9EE', accent: '#4C9AEA' },
+    { id: 'blueprint', label: 'Blueprint', bg: '#0F2747', primary: '#FFFFFF', accent: '#FFB347' },
+    { id: 'warm', label: 'Warm', bg: '#F5F0E6', primary: '#7A2E1C', accent: '#C8642B' },
+  ]);
+  static VIEWS = Object.freeze(['source', 'split', 'chart']);
+  static MODES = Object.freeze(['edit', 'present']);
+  static DEFAULTS = Object.freeze({ view: 'chart', mode: 'edit', theme: 'light', zoom: 1 });
+
+  // ---------- the address bar as state (pure) ----------
+  //   ?src=<url>  ?view=source|split|chart  ?mode=edit|present  ?theme=light|dark|blueprint|warm
+  //   ?sel=<path> (selected element)  ?open=<path>,<path> (expanded boxes)  ?zoom=<0.3..2>
+  // Unknown values are ignored; other params are kept as they are.
+  static fromQuery(search) {
+    const q = new URLSearchParams(search);
+    const D = Component.DEFAULTS;
+    const pick = (k, allowed) => (allowed.includes(q.get(k)) ? q.get(k) : D[k]);
+    const zoom = Number(q.get('zoom'));
+    const sel = (q.get('sel') ?? '').trim();
+    const src = (q.get('src') ?? '').trim();
+    const open = (q.get('open') ?? '').split(',').map((p) => p.trim()).filter((p) => p !== '');
+    // Opening a link to a nested element expands what contains it, so it is visible.
+    const expanded = [...new Set([...open, ...(sel === '' ? [] : Component.lib.ancestorsOf(sel))])];
+    return {
+      view: pick('view', Component.VIEWS),
+      mode: pick('mode', Component.MODES),
+      theme: Component.THEMES.some((t) => t.id === q.get('theme')) ? q.get('theme') : null,
+      zoom: q.get('zoom') !== null && zoom >= 0.3 && zoom <= 2 ? zoom : D.zoom,
+      sel: sel === '' ? null : { t: 'el', path: sel },
+      expanded,
+      src: src === '' ? null : src,
+    };
+  }
+
+  static toQuery(s, search) {
+    const q = new URLSearchParams(search);
+    const D = Component.DEFAULTS;
+    ['src', 'view', 'mode', 'theme', 'sel', 'open', 'zoom'].forEach((k) => q.delete(k));
+    if (s.srcUrl !== null) q.set('src', s.srcUrl);
+    if (s.view !== D.view) q.set('view', s.view);
+    if (s.mode !== D.mode) q.set('mode', s.mode);
+    if (s.theme !== D.theme) q.set('theme', s.theme);
+    if (s.sel !== null && s.sel.t === 'el') q.set('sel', s.sel.path);
+    if (s.expanded.length > 0) q.set('open', s.expanded.join(','));
+    if (s.zoom !== D.zoom) q.set('zoom', String(s.zoom));
+    const out = q.toString().replace(/%2F/gi, '/').replace(/%3A/gi, ':').replace(/%2C/gi, ',');
+    return out === '' ? '' : `?${out}`;
+  }
+
+  static storedSplit() {
+    let w = null;
+    try { w = Number(window.localStorage.getItem(Component.SPLIT_KEY)); } catch (err) { w = null; }
+    return w >= 200 ? w : Component.MD_W;
+  }
+
+  static initial() {
+    const p = Component.fromQuery(window.location.search);
+    let theme = p.theme;
+    if (theme === null) { try { theme = window.localStorage.getItem(Component.THEME_KEY); } catch (err) { theme = null; } }
+    if (!Component.THEMES.some((t) => t.id === theme)) theme = Component.DEFAULTS.theme;
+    return { view: p.view, mode: p.mode, theme, zoom: p.zoom, sel: p.sel, expanded: p.expanded, srcUrl: p.src };
+  }
 
   state = {
     md: Component.lib.SAMPLE,
     lastGoodMd: Component.lib.SAMPLE,
-    mode: 'edit',
-    view: 'chart',
-    expanded: [],
-    sel: null,
+    ...Component.initial(),
+    fileName: 'architecture.md',
+    copyLabel: 'Copy to clipboard',
+    mdW: Component.storedSplit(),
+    openDlg: false,
+    openUrl: '',
+    openBusy: false,
+    openErr: null,
+    dragging: false,
     drag: null,
     link: null,
-    zoom: 1,
     scrollTop: 0,
     drafts: {},
     note: null,
@@ -1117,6 +1248,8 @@ class Component extends DCLogic {
   onKeyDown = (e) => {
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
+    if (mod && k === 's') { e.preventDefault(); this.onSave(); return; }
+    if (e.target.closest('dialog') !== null) return;
     if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) this.onRedo(); else this.onUndo(); return; }
     if (mod && k === 'y') { e.preventDefault(); this.onRedo(); return; }
     if (e.key !== 'Delete' && e.key !== 'Backspace') return;
@@ -1163,6 +1296,17 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
+    this._prev = this.state;
+    document.documentElement.dataset.theme = this.state.theme;
+    this._onPop = () => this.applyQuery();
+    window.addEventListener('popstate', this._onPop);
+    if (this.state.srcUrl !== null) this.loadSrc(this.state.srcUrl); else this.loadStored();
+  }
+
+  componentWillUnmount() { window.removeEventListener('popstate', this._onPop); }
+
+  // Markdown from ?src= is never autosaved, so it cannot overwrite the copy kept in this browser.
+  loadStored() {
     let stored;
     try { stored = window.localStorage.getItem(Component.STORAGE_KEY); } catch (err) {
       this.setState({ save: 'unavailable' });
@@ -1173,11 +1317,45 @@ class Component extends DCLogic {
     this.setState({ md: stored, lastGoodMd: r.ok ? stored : null, save: 'saved' });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.md !== this.state.md && this.state.save !== 'unavailable') this.persist(this.state.md);
+  loadSrc(raw) {
+    this.flash(`Loading ${raw}…`, 'warn');
+    this.fetchMd(raw).then(
+      // The link's own document is where history starts, so it is not undoable.
+      ({ url, md }) => { this.loadMd(md, url.split('/').pop() || 'architecture.md', raw, `Opened ${url}`); this.setState({ past: [], future: [] }); },
+      (err) => { this.setState({ srcUrl: null }); this.loadStored(); this.flash(`Could not load ${raw}: ${err.message}`, 'bad'); },
+    );
+  }
+
+  // Back/Forward: take the view settings from the address bar; reload only if ?src= changed.
+  applyQuery() {
+    const p = Component.fromQuery(window.location.search);
+    const theme = p.theme === null ? this.state.theme : p.theme;
+    const srcChanged = p.src !== this.state.srcUrl;
+    this.setState({ view: p.view, mode: p.mode, theme, zoom: p.zoom, sel: p.sel, expanded: p.expanded, srcUrl: p.src, drafts: {}, drag: null, link: null });
+    if (srcChanged) { if (p.src !== null) this.loadSrc(p.src); else this.loadStored(); }
+  }
+
+  // dc-runtime passes only prevProps here, so the previous state is kept by hand
+  // (setState replaces this.state with a new object, so a reference is enough).
+  componentDidUpdate() {
+    const s = this.state;
+    const prevState = this._prev;
+    this._prev = s;
+    if (prevState.md !== s.md && s.save !== 'unavailable' && s.srcUrl === null) this.persist(s.md);
+    if (prevState.theme !== s.theme) {
+      document.documentElement.dataset.theme = s.theme;
+      try { window.localStorage.setItem(Component.THEME_KEY, s.theme); } catch (err) { /* theme still applies; it just is not remembered */ }
+    }
+    const q = Component.toQuery(s, window.location.search);
+    if (q !== window.location.search) {
+      // A new view, mode, selection or file is a history step; zoom and expand/collapse just update the link.
+      const step = prevState.view !== s.view || prevState.mode !== s.mode || prevState.srcUrl !== s.srcUrl || JSON.stringify(prevState.sel) !== JSON.stringify(s.sel);
+      window.history[step ? 'pushState' : 'replaceState'](null, '', q + window.location.hash);
+    }
+    if (s.openDlg && !prevState.openDlg) document.querySelector('dialog.modal')?.showModal();
     if (this._scrollSel === true) {
       this._scrollSel = false;
-      if (this.state.view !== 'chart') this.scrollMarkdownToSelection();
+      if (s.view !== 'chart') this.scrollMarkdownToSelection();
     }
   }
 
@@ -1303,32 +1481,130 @@ class Component extends DCLogic {
 
   onTaScroll = (e) => { this.setState({ scrollTop: e.target.scrollTop }); };
 
+  // navigator.clipboard needs a secure context (https or localhost) and may be blocked in iframes;
+  // execCommand('copy') on a temporary textarea covers file:// and plain http.
   onCopy = () => {
-    if (navigator.clipboard === undefined) { this.flash('Copy failed: the clipboard is not available here; select the text and copy it instead', 'bad'); return; }
-    navigator.clipboard.writeText(this.state.md).then(
-      () => this.flash('Markdown copied', 'ok'),
-      (err) => this.flash(`Copy failed: ${err.message}`, 'bad'),
+    const done = (ok, why) => {
+      this.setState({ copyLabel: ok ? 'Copied' : 'Copy failed', note: { text: ok ? 'Markdown copied' : `Copy failed: ${why}; select the text and copy it instead`, tone: ok ? 'ok' : 'bad' } });
+      window.clearTimeout(this._copyT);
+      this._copyT = window.setTimeout(() => this.setState({ copyLabel: 'Copy to clipboard' }), 1500);
+    };
+    const fallback = (why) => {
+      const ta = document.createElement('textarea');
+      ta.value = this.state.md;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      ta.remove();
+      done(ok, why);
+    };
+    if (navigator.clipboard === undefined || !window.isSecureContext) { fallback('the clipboard is not available here'); return; }
+    navigator.clipboard.writeText(this.state.md).then(() => done(true, ''), (err) => fallback(err.message));
+  };
+
+  // Replaces the document (undoable). srcUrl is where it came from, or null for a local file / the sample.
+  loadMd(raw, fileName, srcUrl, label) {
+    const md = raw.replace(/\r\n?/g, '\n');
+    const res = this.parsedOf(md);
+    this._handle = undefined;
+    this.setState({
+      md, lastGoodMd: res.ok ? md : this.state.lastGoodMd, drafts: {}, ...this.histPatch(md, null),
+      // A ?src= link may already say what to select and expand; anything else starts fresh.
+      ...(srcUrl !== null && srcUrl === this.state.srcUrl ? {} : { expanded: [], sel: null }),
+      fileName, srcUrl, openDlg: false, openBusy: false, openErr: null, dragging: false, note: { text: label, tone: 'ok' },
+    });
+  }
+
+  async fetchMd(raw) {
+    const url = new URL(raw, window.location.href);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return { url: url.href, md: await res.text() };
+  }
+
+  openFile(file) {
+    if (file === undefined) { this.setState({ openErr: 'Drop or choose a .md file.' }); return; }
+    if (!/\.(md|markdown|txt)$/i.test(file.name)) { this.setState({ openErr: `"${file.name}" is not a markdown file (.md).` }); return; }
+    file.text().then(
+      (md) => this.loadMd(md, file.name, null, `Opened ${file.name}`),
+      (err) => this.setState({ openErr: `Could not read ${file.name}: ${err.message}` }),
+    );
+  }
+
+  onImport = (e) => { this.openFile(e.target.files[0]); e.target.value = ''; };
+
+  onReset = () => this.loadMd(Component.lib.SAMPLE, 'architecture.md', null, 'Sample loaded');
+
+  // ---------- open dialog ----------
+  onOpenShow = () => this.setState({ openDlg: true, openErr: null, dragging: false });
+  onOpenHide = () => this.setState({ openDlg: false, openBusy: false });
+  onOpenCancel = (e) => { e.preventDefault(); this.onOpenHide(); };
+  onOpenBackdrop = (e) => { if (e.target === e.currentTarget) this.onOpenHide(); };
+  onDragOver = (e) => { e.preventDefault(); if (!this.state.dragging) this.setState({ dragging: true }); };
+  onDragLeave = () => this.setState({ dragging: false });
+  onDrop = (e) => { e.preventDefault(); this.setState({ dragging: false }); this.openFile(e.dataTransfer.files[0]); };
+  onOpenUrlChange = (e) => this.setState({ openUrl: e.target.value });
+  onOpenUrl = (e) => {
+    e.preventDefault();
+    const raw = this.state.openUrl.trim();
+    if (raw === '' || this.state.openBusy) return;
+    this.setState({ openBusy: true, openErr: null });
+    this.fetchMd(raw).then(
+      ({ url, md }) => this.loadMd(md, url.split('/').pop() || 'architecture.md', url, `Opened ${url}`),
+      (err) => this.setState({ openBusy: false, openErr: `Could not open ${raw}: ${err.message}` }),
     );
   };
 
-  onImport = (e) => {
-    const input = e.target;
-    const file = input.files[0];
-    if (file === undefined) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const md = String(reader.result).replace(/\r\n?/g, '\n');
-      const res = this.parsedOf(md);
-      this.setState({ md, lastGoodMd: res.ok ? md : this.state.lastGoodMd, expanded: [], sel: null, drafts: {}, ...this.histPatch(md, null), note: { text: `Imported ${file.name}`, tone: 'ok' } });
-      input.value = '';
-    };
-    reader.onerror = () => { this.flash(`Import failed: ${reader.error === null ? 'unknown error' : reader.error.message}`, 'bad'); input.value = ''; };
-    reader.readAsText(file);
+  // ---------- download / save ----------
+  onDownload = () => {
+    const url = URL.createObjectURL(new Blob([this.state.md], { type: 'text/markdown;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.state.fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    this.flash(`Downloaded ${this.state.fileName}`, 'ok');
   };
 
-  onReset = () => {
-    const md = Component.lib.SAMPLE;
-    this.setState({ md, lastGoodMd: md, expanded: [], sel: null, drafts: {}, ...this.histPatch(md, null), note: { text: 'Sample loaded', tone: 'ok' } });
+  // Writes to a file on disk where the browser allows it (Chromium), asking where only the first time;
+  // elsewhere it falls back to a download.
+  onSave = async () => {
+    if (typeof window.showSaveFilePicker !== 'function') { this.onDownload(); return; }
+    try {
+      if (this._handle === undefined) {
+        this._handle = await window.showSaveFilePicker({ suggestedName: this.state.fileName, types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }] });
+      }
+      const w = await this._handle.createWritable();
+      await w.write(this.state.md);
+      await w.close();
+      this.setState({ fileName: this._handle.name, note: { text: `Saved ${this._handle.name}`, tone: 'ok' } });
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      this._handle = undefined;
+      this.flash(`Save failed: ${err.message}`, 'bad');
+    }
+  };
+
+  // ---------- split view divider ----------
+  setSplit(w) {
+    const max = this.query('.main').clientWidth - 320;
+    const mdW = Math.round(Math.max(200, Math.min(max, w)));
+    this.setState({ mdW });
+    try { window.localStorage.setItem(Component.SPLIT_KEY, String(mdW)); } catch (err) { /* width still applies; it just is not remembered */ }
+  }
+  onSplitDown = (e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); e.currentTarget.classList.add('on'); this._splitting = true; };
+  onSplitMove = (e) => { if (this._splitting === true) this.setSplit(e.clientX - this.query('.main').getBoundingClientRect().left); };
+  onSplitUp = (e) => { this._splitting = false; e.currentTarget.classList.remove('on'); };
+  onSplitReset = () => this.setSplit(Component.MD_W);
+  onSplitKey = (e) => {
+    const step = e.shiftKey ? 96 : 24;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); this.setSplit(this.state.mdW - step); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); this.setSplit(this.state.mdW + step); }
   };
 
   // ---------- toolbar handlers ----------
@@ -1631,7 +1907,16 @@ class Component extends DCLogic {
       modelTitle: model === null ? '' : model.title,
       md: s.md, lines, scrollTop: s.scrollTop,
       onMdChange: this.onMdChange, onCaret: this.onCaret, onTaScroll: this.onTaScroll,
-      onCopy: this.onCopy, onImport: this.onImport, onReset: this.onReset,
+      onCopy: this.onCopy, copyLabel: s.copyLabel, onImport: this.onImport, onReset: this.onReset, onDownload: this.onDownload, onSave: this.onSave,
+      fileName: s.fileName,
+      themes: Component.THEMES.map((t) => ({ ...t, on: t.id === s.theme, cls: t.id === s.theme ? 'theme-btn on' : 'theme-btn', pick: () => this.setState({ theme: t.id }) })),
+      isSplit: s.view === 'split', mainCls: s.view === 'split' ? 'main split' : 'main', mdW: s.mdW,
+      onSplitDown: this.onSplitDown, onSplitMove: this.onSplitMove, onSplitUp: this.onSplitUp, onSplitReset: this.onSplitReset, onSplitKey: this.onSplitKey,
+      openDlg: s.openDlg, onOpenShow: this.onOpenShow, onOpenHide: this.onOpenHide, onOpenCancel: this.onOpenCancel, onOpenBackdrop: this.onOpenBackdrop,
+      dropCls: s.dragging ? 'drop on' : 'drop', onDragOver: this.onDragOver, onDragLeave: this.onDragLeave, onDrop: this.onDrop,
+      openUrl: s.openUrl, onOpenUrlChange: this.onOpenUrlChange, onOpenUrl: this.onOpenUrl,
+      noOpenUrl: s.openUrl.trim() === '' || s.openBusy, openUrlLabel: s.openBusy ? 'Opening…' : 'Open',
+      hasOpenErr: s.openErr !== null, openErr: s.openErr === null ? '' : s.openErr,
       onExpandAll: this.onExpandAll, onCollapseAll: this.onCollapseAll,
       addLabel: addParent === null ? 'Add:' : `Add to ${idx.get(addParent).el.name}:`,
       palette, noEdit, noModel: model === null, noAdd: noEdit || model === null,
@@ -1653,7 +1938,7 @@ class Component extends DCLogic {
         counts,
         hasAuto: geo !== null && geo.autoCount > 0,
         auto: geo === null ? '' : `${geo.autoCount} auto-placed (drag to pin)`,
-        save: s.save === 'saved' ? 'Saved in this browser' : s.save === 'unavailable' ? 'Not saved: browser storage is unavailable here; copy the markdown to keep it' : 'Saving…',
+        save: s.srcUrl !== null ? 'From a link, so not saved in this browser; Save or Download to keep changes' : s.save === 'saved' ?'Saved in this browser' : s.save === 'unavailable' ? 'Not saved: browser storage is unavailable here; copy the markdown to keep it' : 'Saving…',
         hasNote: s.note !== null, note: s.note === null ? '' : s.note.text,
         noteCls: s.note === null ? '' : s.note.tone,
       },

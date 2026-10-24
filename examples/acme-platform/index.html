@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Acme architecture</title>
+<script>
+  // The viewer lives in its own repo; this repo only holds the data.
+  // Extra query params (?view=, ?theme=, ?sel=…) are passed through.
+  const VIEWER = 'https://aaronp.github.io/c4/';
+  const src = new URL('architecture.md', location.href).href;
+  location.replace(VIEWER + '?src=' + encodeURIComponent(src) + location.search.replace(/^\?/, '&') + location.hash);
+</script>
+<a href="architecture.md">architecture.md</a>
