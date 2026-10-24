@@ -1,0 +1,1778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>C4 Markdown Viewer</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EEF0F3}
+a{color:#1168BD}a:hover{color:#08427B}
+.app{font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1B1F27;display:flex;flex-direction:column;height:100vh;min-height:640px;background:#EEF0F3;box-sizing:border-box}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:#FFFFFF;border-bottom:1px solid #D7DBE1;min-height:52px;box-sizing:border-box}
+.main{flex:1;min-height:0;display:flex;flex-wrap:wrap}
+.pane-md{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;background:#FBFBFC;border-right:1px solid #D7DBE1}
+.pane-dia{flex:999 1 640px;min-width:0;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #D7DBE1;background:#FFFFFF;min-height:52px;box-sizing:border-box}
+.bar-title{font-weight:600;font-size:14px;margin-right:auto;display:flex;align-items:center;gap:8px}
+.bar-title span{font-weight:400;color:#5A6170;font-size:12px}
+.model-title{font-weight:600;font-size:15px;margin-right:8px}
+.grow{flex:1}
+.sep{width:1px;height:24px;background:#D7DBE1;margin:0 4px}
+.add-l{font-size:12px;color:#5A6170;font-weight:500}
+.btn{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border:1px solid #C9CED6;border-radius:6px;background:#FFFFFF;color:#1B1F27;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;white-space:nowrap}
+.btn:hover{background:#F2F4F7}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn.danger{color:#B42318;border-color:#F3B8B2}
+.btn.icon{width:36px;padding:0;justify-content:center}
+.seg{display:inline-flex;border:1px solid #C9CED6;border-radius:8px;padding:2px;gap:2px;background:#F2F4F7}
+.seg button{font:inherit;font-size:13px;min-height:32px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:#3B4250;cursor:pointer}
+.seg button.on{background:#1B1F27;color:#FFFFFF}
+.ed{position:relative;flex:1;min-height:280px;overflow:hidden;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;line-height:20px}
+.ed-gutter{position:absolute;left:0;top:0;bottom:0;width:44px;background:#F1F3F6;border-right:1px solid #E3E6EB}
+.ed-back{position:absolute;left:0;right:0;top:0;padding-top:12px;pointer-events:none}
+.ln{height:20px;display:flex}
+.ln-n{width:44px;flex:none;text-align:right;padding-right:10px;box-sizing:border-box;color:#6B7280;font-size:11px}
+.ln.hl{background:#E3EEFB}
+.ln.hl .ln-n{color:#08427B;font-weight:500}
+.ln.err{background:#FDE7E7}
+.ln.err .ln-n{color:#B42318;font-weight:500}
+.ta{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;margin:0;border:0;outline:none;resize:none;background:transparent;padding:12px 12px 12px 56px;font:inherit;color:#1B1F27;white-space:pre;overflow:auto;caret-color:#1168BD;tab-size:2}
+.body{flex:1;min-height:0;display:flex;flex-wrap:wrap}
+.stage{position:relative;flex:999 1 420px;min-width:0;min-height:360px;display:flex}
+.vp{position:relative;flex:1;overflow:auto;background:#EEF0F3;outline:none}
+.vp:focus-visible{box-shadow:inset 0 0 0 2px #1168BD}
+.sizer{position:relative}
+.host{position:absolute;left:0;top:0;transform-origin:0 0}
+.host.grid{background-image:radial-gradient(#C3C8D1 1px,transparent 1px);background-size:24px 24px}
+.host.stale{opacity:.45;filter:grayscale(.7)}
+.banner{position:absolute;left:12px;right:12px;top:12px;z-index:5;padding:10px 14px;background:#FEF3F2;border:1px solid #F3B8B2;color:#7A271A;border-radius:8px;font-size:13px;line-height:18px}
+.empty{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:4;max-width:380px;text-align:center;color:#3B4250;font-size:14px;line-height:21px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#FFFFFF;padding:2px 6px;border-radius:4px;border:1px solid #D7DBE1}
+.node{position:absolute;box-sizing:border-box;border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;color:#FFFFFF;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 1px 2px rgba(16,24,40,.2),0 2px 8px rgba(16,24,40,.08)}
+.app.present .node{cursor:pointer}
+.node.kids{padding-bottom:30px}
+.node.sel{outline:3px solid #F59E0B;outline-offset:3px}
+.node.dim{opacity:.45}
+.node .nm{font-weight:600;font-size:15px;line-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node .ty{font-size:11px;line-height:14px;opacity:.92}
+.node .ds{font-size:12px;line-height:16px;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.node.kids .ds{-webkit-line-clamp:2}
+.node .auto{position:absolute;top:6px;left:8px;font-size:10px;line-height:12px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.22)}
+.xp{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font:inherit;font-size:11px;line-height:14px;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.16);color:inherit;cursor:pointer;white-space:nowrap}
+.xp:hover{background:rgba(255,255,255,.3)}
+.k-component .xp{border-color:rgba(11,37,69,.4)}
+.k-person{background:#08427B;border-radius:28px}
+.k-xperson{background:#5E6470;border-radius:28px}
+.k-system{background:#1168BD}
+.k-external{background:#5E6470}
+.k-container{background:#3478C6}
+.k-database{background:#3478C6;border-radius:50% / 18%}
+.k-queue{background:#3478C6;border-radius:16% / 50%}
+.k-component{background:#85BBF0;color:#0B2545}
+.head{position:absolute;top:-40px;left:50%;width:48px;height:48px;margin-left:-24px;border-radius:50%;background:inherit;box-shadow:0 1px 2px rgba(16,24,40,.2)}
+.handle{position:absolute;right:-10px;top:50%;margin-top:-10px;width:20px;height:20px;border-radius:50%;border:2px solid #FFFFFF;background:#F59E0B;padding:0;cursor:crosshair;opacity:0;touch-action:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.node:hover .handle,.node.sel .handle{opacity:1}
+.app.present .handle{display:none}
+.bound{position:absolute;border:2px dashed #7B8494;border-radius:12px;pointer-events:none;box-sizing:border-box;background:rgba(255,255,255,.35)}
+.bound.d2{background:rgba(255,255,255,.45);border-color:#8E97A6}
+.bound.sel{border-color:#F59E0B}
+.bound-label{position:absolute;display:flex;align-items:center;gap:6px;font-size:14px;line-height:18px;color:#2B313C;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:4px 6px 4px 8px;border-radius:6px;white-space:nowrap}
+.app.present .bound-label{cursor:pointer}
+.bound-label:hover{background:rgba(255,255,255,.85)}
+.bound-label.sel{background:#FEF3C7}
+.bound-label span{color:#5A6170;font-size:11px}
+.collapse{font:inherit;font-size:11px;line-height:14px;padding:3px 8px;border-radius:10px;border:1px solid #C9CED6;background:#FFFFFF;color:#3B4250;cursor:pointer}
+.collapse:hover{background:#F2F4F7}
+svg.edge{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.e-line{fill:none;stroke:#5B6576;stroke-width:1.5;stroke-dasharray:6 4}
+.e-head{fill:#5B6576;stroke:none}
+.e-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
+svg.edge.multi .e-line{stroke-width:2.5}
+svg.edge.sel .e-line{stroke:#D97706;stroke-width:2.5;stroke-dasharray:none}
+svg.edge.sel .e-head{fill:#D97706}
+svg.edge.dim{opacity:.18}
+.elabel{position:absolute;transform:translate(-50%,-50%);background:#EEF0F3;padding:2px 6px;border-radius:4px;font-size:12px;line-height:15px;text-align:center;color:#2B313C;max-width:180px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.elabel .tech{display:block;font-size:11px;color:#5A6170}
+.elabel.multi{font-weight:600}
+.elabel.sel{background:#FEF3C7}
+.elabel.dim{opacity:.25}
+svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.ghost-line{fill:none;stroke:#D97706;stroke-width:2;stroke-dasharray:4 4}
+.card{position:absolute;left:16px;bottom:16px;z-index:6;width:320px;max-width:calc(100% - 32px);box-sizing:border-box;background:#FFFFFF;border:1px solid #D7DBE1;border-radius:10px;padding:14px 16px;box-shadow:0 4px 16px rgba(16,24,40,.12);display:flex;flex-direction:column;gap:6px}
+.card-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+.card .ty{font-size:12px;color:#5A6170}
+.card p{margin:0;font-size:13px;line-height:19px;color:#2B313C}
+.insp{flex:1 1 300px;max-width:100%;border-left:1px solid #D7DBE1;background:#FFFFFF;overflow:auto;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;min-height:0}
+.insp-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.lbl,.fld label{font-size:12px;font-weight:600;color:#3B4250}
+.inp{font:inherit;font-size:14px;min-height:36px;padding:0 10px;border:1px solid #C9CED6;border-radius:6px;background:#FFFFFF;color:#1B1F27;box-sizing:border-box;width:100%}
+.inp.mono{font-family:'IBM Plex Mono',monospace;font-size:13px}
+.inp:focus{outline:2px solid #1168BD;outline-offset:-1px;border-color:#1168BD}
+.inp.bad{border-color:#B42318;outline-color:#B42318}
+.inp:disabled{background:#F2F4F7}
+.ferr{font-size:12px;color:#B42318}
+.path{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#F1F3F6;padding:6px 8px;border-radius:4px;color:#2B313C;word-break:break-all}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:12px;min-height:32px;padding:0 10px;border-radius:16px;border:1px solid #C9CED6;background:#FFFFFF;color:#1B1F27;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
+.chip:hover{background:#F2F4F7}
+.chip.on{background:#1B1F27;color:#FFFFFF;border-color:#1B1F27}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.sw{width:12px;height:12px;border-radius:3px !important;display:inline-block;flex:none}
+.rels{display:flex;flex-direction:column;gap:4px}
+.rel-row{display:flex;align-items:center;gap:6px;min-height:36px;border:1px solid #E3E6EB;border-radius:6px;padding:0 4px 0 0}
+.rel-go{font:inherit;font-size:13px;flex:1;min-width:0;min-height:34px;text-align:left;border:0;background:transparent;cursor:pointer;padding:0 8px;color:#1B1F27;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:6px}
+.rel-go:hover{background:#F2F4F7}
+.rel-go span{color:#5A6170}
+.x{width:28px;height:28px;border:0;background:transparent;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#5A6170;padding:0;flex:none}
+.x:hover{background:#FEF3F2;color:#B42318}
+.x:disabled{opacity:.45;cursor:not-allowed}
+.x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.muted{color:#5A6170;font-size:13px;line-height:19px;margin:0}
+.help{margin:0;padding-left:18px;color:#3B4250;font-size:13px;line-height:20px;display:flex;flex-direction:column;gap:6px}
+.help code,.muted code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#F1F3F6;padding:1px 4px;border-radius:3px}
+.status{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:6px 12px;font-size:12px;line-height:18px;border-top:1px solid #D7DBE1;background:#FFFFFF;color:#3B4250;min-height:32px;box-sizing:border-box}
+.status .ok{color:#067647;font-weight:500}
+.status .bad{color:#B42318;font-weight:500}
+.status .warn{color:#93370D}
+@media (pointer:coarse){.btn,.inp{min-height:44px}.seg button{min-height:40px}.chip{min-height:40px}.handle{width:30px;height:30px;right:-15px;margin-top:-15px;opacity:1}}
+@media (max-width:860px){.app{height:auto}.pane-md{flex-basis:100%;height:50vh;border-right:0;border-bottom:1px solid #D7DBE1}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid #D7DBE1}}
+</style>
+</helmet>
+<div class="{{appCls}}" onKeyDown="{{onKeyDown}}">
+
+<div class="topbar">
+<button class="btn icon" onClick="{{onUndo}}" disabled="{{noUndo}}" aria-label="Undo" title="Undo (Ctrl/⌘+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+<button class="btn icon" onClick="{{onRedo}}" disabled="{{noRedo}}" aria-label="Redo" title="Redo (Ctrl/⌘+Shift+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+<div class="sep"></div>
+<div class="seg" role="group" aria-label="View"><button class="{{viewSourceCls}}" onClick="{{onViewSource}}">Source</button><button class="{{viewSplitCls}}" onClick="{{onViewSplit}}">Split</button><button class="{{viewChartCls}}" onClick="{{onViewChart}}">Chart</button></div>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<div class="seg" role="group" aria-label="Mode"><button class="{{presentCls}}" onClick="{{onPresent}}">Present</button><button class="{{editCls}}" onClick="{{onEdit}}">Edit</button></div>
+</sc-if>
+<span class="model-title">{{modelTitle}}</span>
+</div>
+
+<div class="main">
+<sc-if value="{{showSource}}" hint-placeholder-val="{{ false }}">
+<section class="pane-md" aria-label="Markdown source">
+<div class="bar">
+<div class="bar-title">architecture.md <span>source of truth</span></div>
+<button class="btn" onClick="{{onCopy}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>Copy</button>
+<label class="btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>Import .md<input type="file" accept=".md,.markdown,text/markdown,text/plain" onChange="{{onImport}}" style="display: none"></label>
+<button class="btn" onClick="{{onReset}}">Load sample</button>
+</div>
+<div class="ed">
+<div class="ed-gutter"></div>
+<div class="ed-back" style="transform: translateY(-{{scrollTop}}px)" aria-hidden="true">
+<sc-for list="{{lines}}" as="l" hint-placeholder-count="40">
+<div class="{{l.cls}}"><span class="ln-n">{{l.n}}</span></div>
+</sc-for>
+</div>
+<textarea class="ta" wrap="off" spellcheck="false" aria-label="Markdown source" value="{{md}}" onChange="{{onMdChange}}" onSelect="{{onCaret}}" onClick="{{onCaret}}" onScroll="{{onTaScroll}}"></textarea>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<section class="pane-dia" aria-label="C4 diagram">
+<div class="bar">
+<button class="btn" onClick="{{onExpandAll}}" disabled="{{noModel}}">Expand all</button>
+<button class="btn" onClick="{{onCollapseAll}}" disabled="{{noModel}}">Collapse all</button>
+<sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
+<div class="sep"></div>
+<span class="add-l">{{addLabel}}</span>
+<sc-for list="{{palette}}" as="p" hint-placeholder-count="4">
+<button class="btn" onClick="{{p.add}}" disabled="{{noAdd}}" title="Add {{p.label}}"><span class="{{p.sw}}"></span>{{p.label}}</button>
+</sc-for>
+</sc-if>
+<div class="grow"></div>
+<button class="btn icon" onClick="{{onZoomOut}}" aria-label="Zoom out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<button class="btn" onClick="{{onZoomReset}}" aria-label="Reset zoom to 100%">{{zoomPct}}%</button>
+<button class="btn icon" onClick="{{onZoomIn}}" aria-label="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button>
+<button class="btn" onClick="{{onFit}}" disabled="{{noModel}}">Fit</button>
+</div>
+
+<div class="body">
+<div class="stage">
+<sc-if value="{{stale}}" hint-placeholder-val="{{ false }}">
+<div class="banner" role="alert"><b>Line {{errLine}}:</b> {{errReason}}. The diagram shows the last valid version and is read-only until the markdown is fixed.</div>
+</sc-if>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+<div class="empty"><div>No model yet. Start one with a <code># Model: My Platform</code> heading in the markdown, or:</div><button class="btn" onClick="{{onCreateModel}}" disabled="{{noEdit}}">+ New model</button></div>
+</sc-if>
+<div class="vp" tabIndex="0" aria-label="Diagram canvas" onPointerDown="{{onVpDown}}" onPointerMove="{{onVpMove}}" onPointerUp="{{onVpUp}}" onPointerCancel="{{onVpCancel}}">
+<div class="sizer" style="width: {{sizerW}}px; height: {{sizerH}}px">
+<div class="{{hostCls}}" style="width: {{W}}px; height: {{H}}px; transform: scale({{zoom}})">
+
+<sc-for list="{{bounds}}" as="b" hint-placeholder-count="1">
+<div class="{{b.cls}}" style="left: {{b.x}}px; top: {{b.y}}px; width: {{b.w}}px; height: {{b.h}}px"></div>
+</sc-for>
+
+<sc-for list="{{edges}}" as="e" hint-placeholder-count="4">
+<svg class="{{e.cls}}" width="{{W}}" height="{{H}}" aria-hidden="true"><path class="e-line" d="{{e.line}}"></path><path class="e-head" d="{{e.head}}"></path><path class="e-hit" d="{{e.line}}" onPointerDown="{{e.down}}"></path></svg>
+</sc-for>
+
+<sc-for list="{{bounds}}" as="b" hint-placeholder-count="1">
+<div class="{{b.lcls}}" style="left: {{b.lx}}px; top: {{b.ly}}px" onPointerDown="{{b.down}}" onClick="{{b.click}}"><b>{{b.name}}</b><span>{{b.typeLine}}</span><button class="collapse" onPointerDown="{{stop}}" onClick="{{b.collapse}}" aria-label="Collapse {{b.name}}">Collapse</button></div>
+</sc-for>
+
+<sc-for list="{{nodes}}" as="n" hint-placeholder-count="4">
+<div class="{{n.cls}}" style="left: {{n.x}}px; top: {{n.y}}px; width: {{n.w}}px; height: {{n.h}}px" onPointerDown="{{n.down}}" onClick="{{n.click}}" onDoubleClick="{{n.dbl}}">
+<sc-if value="{{n.isPerson}}" hint-placeholder-val="{{ false }}"><div class="head"></div></sc-if>
+<sc-if value="{{n.auto}}" hint-placeholder-val="{{ false }}"><div class="auto">auto</div></sc-if>
+<div class="nm">{{n.name}}</div>
+<div class="ty">{{n.typeLine}}</div>
+<sc-if value="{{n.hasDesc}}" hint-placeholder-val="{{ true }}"><div class="ds">{{n.desc}}</div></sc-if>
+<sc-if value="{{n.hasKids}}" hint-placeholder-val="{{ false }}"><button class="xp" onPointerDown="{{stop}}" onClick="{{n.expand}}" aria-label="Expand {{n.name}}">+ {{n.kidsLabel}}</button></sc-if>
+<button class="handle" aria-label="Drag to connect {{n.name}} to another element" onPointerDown="{{n.linkDown}}"></button>
+</div>
+</sc-for>
+
+<sc-for list="{{edges}}" as="e" hint-placeholder-count="4">
+<div class="{{e.lcls}}" style="left: {{e.lx}}px; top: {{e.ly}}px" onPointerDown="{{e.down}}">{{e.text}}<sc-if value="{{e.hasTech}}" hint-placeholder-val="{{ true }}"><span class="tech">[{{e.tech}}]</span></sc-if></div>
+</sc-for>
+
+<sc-if value="{{linking}}" hint-placeholder-val="{{ false }}">
+<svg class="ghost" width="{{W}}" height="{{H}}" aria-hidden="true"><path class="ghost-line" d="{{ghostD}}"></path></svg>
+</sc-if>
+
+</div>
+</div>
+</div>
+
+<sc-if value="{{card.show}}" hint-placeholder-val="{{ false }}">
+<div class="card" role="region" aria-label="Selected element">
+<div class="card-h"><span class="{{card.sw}}"></span>{{card.name}}</div>
+<div class="ty">{{card.typeLine}}</div>
+<sc-if value="{{card.hasDesc}}" hint-placeholder-val="{{ true }}"><p>{{card.desc}}</p></sc-if>
+<p class="muted">{{card.rels}}</p>
+<sc-if value="{{card.hasKids}}" hint-placeholder-val="{{ false }}"><div><button class="btn" onClick="{{card.toggle}}">{{card.toggleLabel}}</button></div></sc-if>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
+<aside class="insp" aria-label="Inspector">
+
+<sc-if value="{{insp.isNone}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{insp.hasModel}}" hint-placeholder-val="{{ true }}">
+<div class="insp-h">Model</div>
+<div class="fld"><label for="f-title">Title</label><input id="f-title" class="{{insp.title.cls}}" value="{{insp.title.value}}" onChange="{{insp.title.onChange}}" onBlur="{{insp.title.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.title.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.title.err}}</div></sc-if></div>
+<p class="muted">{{insp.counts}}</p>
+</sc-if>
+<div class="fld"><span class="lbl">How it works</span>
+<ul class="help">
+<li>One model, nested by heading depth: <code>##</code> people and systems, <code>###</code> containers, <code>####</code> components.</li>
+<li>Every element has a <code>- slug:</code>. Relationships point at dot paths like <code>trading.orders.gateway</code>.</li>
+<li>Click <b>+ containers</b> on a box (or double-click it) to drill in. Relationships roll up to whatever is visible.</li>
+<li>Drag a box to move it; positions go to the <code># Layout</code> section, relative to the parent.</li>
+<li>Drag the orange dot onto another box to add a relationship between exactly those two.</li>
+<li>Select a system or container, then use the Add buttons to add something inside it.</li>
+<li>Delete or Backspace removes the selected box or relationship. Ctrl/⌘+Z undoes, Ctrl/⌘+Shift+Z redoes, for markdown and diagram edits alike.</li>
+</ul></div>
+</sc-if>
+
+<sc-if value="{{insp.isEl}}" hint-placeholder-val="{{ false }}">
+<div class="insp-h"><span class="{{insp.sw}}"></span>{{insp.kind}}</div>
+<div class="path">{{insp.path}}</div>
+<div class="fld"><label for="f-name">Name</label><input id="f-name" class="{{insp.name.cls}}" value="{{insp.name.value}}" onChange="{{insp.name.onChange}}" onBlur="{{insp.name.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.name.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.name.err}}</div></sc-if></div>
+<div class="fld"><label for="f-slug">Slug</label><input id="f-slug" class="{{insp.slug.cls}}" value="{{insp.slug.value}}" onChange="{{insp.slug.onChange}}" onBlur="{{insp.slug.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.slug.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.slug.err}}</div></sc-if></div>
+<div class="fld"><span class="lbl">Kind</span><div class="chips"><sc-for list="{{insp.kinds}}" as="k" hint-placeholder-count="4"><button class="{{k.cls}}" onClick="{{k.pick}}" disabled="{{k.off}}"><span class="{{k.sw}}"></span>{{k.label}}</button></sc-for></div></div>
+<div class="fld"><label for="f-desc">Description</label><input id="f-desc" class="{{insp.desc.cls}}" value="{{insp.desc.value}}" onChange="{{insp.desc.onChange}}" onBlur="{{insp.desc.onBlur}}" disabled="{{noEdit}}" placeholder="What it does"></div>
+<sc-if value="{{insp.showTech}}" hint-placeholder-val="{{ true }}">
+<div class="fld"><label for="f-tech">Technology</label><input id="f-tech" class="{{insp.tech.cls}}" value="{{insp.tech.value}}" onChange="{{insp.tech.onChange}}" onBlur="{{insp.tech.onBlur}}" disabled="{{noEdit}}" placeholder="e.g. Node.js"></div>
+</sc-if>
+<sc-if value="{{insp.hasKids}}" hint-placeholder-val="{{ false }}">
+<div class="fld"><span class="lbl">Contains ({{insp.kidCount}})</span>
+<div class="chips"><sc-for list="{{insp.kids}}" as="k" hint-placeholder-count="3"><button class="chip" onClick="{{k.pick}}">{{k.label}}</button></sc-for></div>
+<div><button class="btn" onClick="{{insp.toggle}}">{{insp.toggleLabel}}</button></div>
+</div>
+</sc-if>
+<div class="fld"><span class="lbl">Relationships out ({{insp.outCount}})</span>
+<div class="rels"><sc-for list="{{insp.outs}}" as="r" hint-placeholder-count="2"><div class="rel-row"><button class="rel-go" onClick="{{r.pick}}">→ {{r.other}} <span>{{r.text}}</span></button><button class="x" onClick="{{r.del}}" disabled="{{noEdit}}" aria-label="Delete relationship to {{r.other}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></sc-for></div>
+<sc-if value="{{insp.noOuts}}" hint-placeholder-val="{{ false }}"><p class="muted">None. Drag the orange dot onto another box to add one.</p></sc-if>
+</div>
+<sc-if value="{{insp.hasIns}}" hint-placeholder-val="{{ false }}">
+<div class="fld"><span class="lbl">Relationships in ({{insp.inCount}})</span>
+<div class="rels"><sc-for list="{{insp.ins}}" as="r" hint-placeholder-count="1"><div class="rel-row"><button class="rel-go" onClick="{{r.pick}}">← {{r.other}} <span>{{r.text}}</span></button></div></sc-for></div>
+</div>
+</sc-if>
+<div><button class="btn danger" onClick="{{insp.del}}" disabled="{{noEdit}}">{{insp.delLabel}}</button></div>
+</sc-if>
+
+<sc-if value="{{insp.isRel}}" hint-placeholder-val="{{ false }}">
+<div class="insp-h">Relationship</div>
+<div class="fld"><span class="lbl">From</span><div class="chips"><button class="chip" onClick="{{insp.pickFrom}}">{{insp.from}}</button></div></div>
+<div class="fld"><label for="f-to">To (path)</label><input id="f-to" class="{{insp.to.cls}} mono" value="{{insp.to.value}}" onChange="{{insp.to.onChange}}" onBlur="{{insp.to.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.to.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.to.err}}</div></sc-if></div>
+<div class="fld"><label for="f-verb">Verb</label><input id="f-verb" class="{{insp.verb.cls}}" value="{{insp.verb.value}}" onChange="{{insp.verb.onChange}}" onBlur="{{insp.verb.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.verb.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.verb.err}}</div></sc-if></div>
+<div class="fld"><label for="f-label">Label</label><input id="f-label" class="{{insp.label.cls}}" value="{{insp.label.value}}" onChange="{{insp.label.onChange}}" onBlur="{{insp.label.onBlur}}" disabled="{{noEdit}}" placeholder="Shown on the line; the verb is used if empty"><sc-if value="{{insp.label.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.label.err}}</div></sc-if></div>
+<div class="fld"><label for="f-rtech">Technology</label><input id="f-rtech" class="{{insp.rtech.cls}}" value="{{insp.rtech.value}}" onChange="{{insp.rtech.onChange}}" onBlur="{{insp.rtech.onBlur}}" disabled="{{noEdit}}" placeholder="e.g. HTTPS"><sc-if value="{{insp.rtech.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.rtech.err}}</div></sc-if></div>
+<p class="muted">Written as <code>{{insp.preview}}</code></p>
+<div><button class="btn danger" onClick="{{insp.del}}" disabled="{{noEdit}}">Delete relationship</button></div>
+</sc-if>
+
+<sc-if value="{{insp.isEdge}}" hint-placeholder-val="{{ false }}">
+<div class="insp-h">{{insp.count}} relationships</div>
+<p class="muted">{{insp.between}} — rolled up from these, because the boxes they connect are collapsed:</p>
+<div class="rels"><sc-for list="{{insp.items}}" as="r" hint-placeholder-count="2"><div class="rel-row"><button class="rel-go" onClick="{{r.pick}}">{{r.from}} → {{r.to}} <span>{{r.text}}</span></button></div></sc-for></div>
+</sc-if>
+
+</aside>
+</sc-if>
+</div>
+</section>
+</sc-if>
+</div>
+
+<div class="status" role="status">
+<span class="{{status.syncCls}}">{{status.sync}}</span>
+<span>{{status.counts}}</span>
+<sc-if value="{{status.hasAuto}}" hint-placeholder-val="{{ false }}"><span class="warn">{{status.auto}}</span></sc-if>
+<span>{{status.save}}</span>
+<sc-if value="{{status.hasNote}}" hint-placeholder-val="{{ false }}"><span class="{{status.noteCls}}">{{status.note}}</span></sc-if>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showGrid":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  /*
+   * MARKDOWN FORMAT (the source of truth)
+   *
+   *   The document is a list of "# " sections, kept in their order:
+   *
+   *   # Model: <Title>      exactly one. The C4 model, nested by heading depth:
+   *     ## <Kind>: <Name>     Person | External Person | System | External
+   *     ### <Kind>: <Name>    Container | Database | Queue      (inside a System or External)
+   *     #### <Kind>: <Name>   Component                         (inside a Container)
+   *
+   *     Bullets under an element (every "- " bullet must be one of these):
+   *       - slug: <id>        REQUIRED. Lower-case letters, digits and single hyphens.
+   *                           Unique among siblings; the element's path is its slugs joined
+   *                           with dots (trading.orders.gateway). Paths are how relationships
+   *                           and the layout refer to elements, so renaming never breaks them.
+   *       - desc: <text>      what it does; shown on the box
+   *       - tech: <text>      its technology, shown as [Container: tech]
+   *       - <verb> → <path>[: <label>] [<tech>]
+   *                           a relationship to any element that is not its own ancestor or
+   *                           descendant ("->" also accepted, "→" is written back). It is
+   *                           drawn between whatever boxes currently represent the two ends,
+   *                           so relationships between components roll up to containers and
+   *                           systems when those are collapsed.
+   *     Other non-bullet lines under an element are kept as its notes.
+   *
+   *   # Layout             optional; written when you drag. One line per positioned element:
+   *     - <path>: <x>, <y>  top-level elements: canvas px. Nested elements: px inside the
+   *                         parent's boundary, so moving a parent moves everything in it.
+   *                         Elements without a line are auto-placed and flagged "auto".
+   *
+   *   # <anything else>    prose, kept verbatim (as is text before the first "#").
+   *
+   *   Typing in the markdown never rewrites it. A diagram edit rewrites the markdown in
+   *   this canonical form. A parse error is shown with its line and diagram editing pauses
+   *   until it is fixed, so a broken document is never overwritten.
+   */
+  static lib = (() => {
+    const TOP_KINDS = Object.freeze(['Person', 'External Person', 'System', 'External']);
+    const CONTAINER_KINDS = Object.freeze(['Container', 'Database', 'Queue']);
+    const COMPONENT_KINDS = Object.freeze(['Component']);
+    const KINDS_BY_DEPTH = Object.freeze({ 1: TOP_KINDS, 2: CONTAINER_KINDS, 3: COMPONENT_KINDS });
+    const CHILD_KINDS = Object.freeze({ 'Person': [], 'External Person': [], 'System': CONTAINER_KINDS, 'External': CONTAINER_KINDS, 'Container': COMPONENT_KINDS, 'Database': [], 'Queue': [], 'Component': [] });
+    const CHILD_NOUN = Object.freeze({ 1: ['container', 'containers'], 2: ['component', 'components'] });
+    const KIND_CLASS = Object.freeze({ 'Person': 'k-person', 'External Person': 'k-xperson', 'System': 'k-system', 'External': 'k-external', 'Container': 'k-container', 'Database': 'k-database', 'Queue': 'k-queue', 'Component': 'k-component' });
+    const KIND_TYPE = Object.freeze({ 'Person': 'Person', 'External Person': 'Person, external', 'System': 'Software System', 'External': 'Software System, external', 'Container': 'Container', 'Database': 'Database', 'Queue': 'Queue', 'Component': 'Component' });
+    const PERSONS = new Set(['Person', 'External Person']);
+    const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    const PATH_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
+    const NODE_W = 224;
+    const NODE_H = 136;
+    const GAP = 96;
+    const PAD = 32;
+    const LABEL_PAD = 64;
+    const SNAP = 8;
+
+    class ParseError extends Error {
+      constructor(line, reason) { super(`line ${line}: ${reason}`); this.line = line; this.reason = reason; }
+    }
+    const fail = (line, reason) => { throw new ParseError(line, reason); };
+
+    const clone = (x) => JSON.parse(JSON.stringify(x));
+    const snap = (v) => Math.round(v / SNAP) * SNAP;
+    const lookup = (table, key, what) => {
+      if (!Object.prototype.hasOwnProperty.call(table, key)) throw new Error(`bug: unknown ${what} "${key}"`);
+      return table[key];
+    };
+    const kindClass = (k) => lookup(KIND_CLASS, k, 'kind');
+    const childKinds = (k) => lookup(CHILD_KINDS, k, 'kind');
+    const typeLine = (e) => `[${lookup(KIND_TYPE, e.kind, 'kind')}${e.tech !== null ? `: ${e.tech}` : ''}]`;
+    const isPerson = (e) => PERSONS.has(e.kind);
+    const joinPath = (parent, slug) => (parent === null ? slug : `${parent}.${slug}`);
+    const parentOf = (path) => { const i = path.lastIndexOf('.'); return i < 0 ? null : path.slice(0, i); };
+    const depthOf = (path) => path.split('.').length;
+    const isWithin = (path, root) => path === root || path.startsWith(`${root}.`);
+    const ancestorsOf = (path) => { const s = path.split('.'); return s.slice(0, -1).map((_, i) => s.slice(0, i + 1).join('.')); };
+    const relText = (r) => `- ${r.verb} → ${r.to}${r.label !== null ? `: ${r.label}` : ''}${r.tech !== null ? ` [${r.tech}]` : ''}`;
+    const slugReason = (s) => (SLUG_RE.test(s) ? null : 'Slugs are lower-case letters, digits and single hyphens, e.g. order-service');
+    function slugify(name) {
+      const s = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      return s === '' ? 'item' : s;
+    }
+    function uniqueIn(base, taken, sepr) {
+      if (!taken.has(base)) return base;
+      for (let i = 2; i < 10000; i += 1) { const n = `${base}${sepr}${i}`; if (!taken.has(n)) return n; }
+      throw new Error('bug: could not find a free name');
+    }
+
+    // ---------- document accessors ----------
+    const modelOf = (doc) => { const m = doc.sections.filter((s) => s.type === 'model'); if (m.length > 1) throw new Error('bug: two models'); return m.length === 0 ? null : m[0]; };
+    const layoutOf = (doc) => { const l = doc.sections.filter((s) => s.type === 'layout'); if (l.length > 1) throw new Error('bug: two layouts'); return l.length === 0 ? null : l[0]; };
+    function index(model) {
+      const out = new Map();
+      const walk = (list, parent) => list.forEach((el) => {
+        const path = joinPath(parent, el.slug);
+        out.set(path, { el, parent, depth: depthOf(path) });
+        walk(el.children, path);
+      });
+      walk(model.children, null);
+      return out;
+    }
+    function findEl(model, path) {
+      let list = model.children;
+      let el = null;
+      path.split('.').forEach((s) => {
+        el = list.find((x) => x.slug === s);
+        if (el === undefined) throw new Error(`bug: no element at path "${path}"`);
+        list = el.children;
+      });
+      return el;
+    }
+    const hasPath = (model, path) => index(model).has(path);
+    const siblingsOf = (model, path) => { const p = parentOf(path); return p === null ? model.children : findEl(model, p).children; };
+
+    // ---------- parse: markdown -> document (pure) ----------
+    function setField(el, key, val, ln) {
+      if (el[key] !== null) fail(ln, `"${key}" is set twice for "${el.name}"`);
+      if (val === '') fail(ln, `"${key}" is empty; delete the line instead`);
+      if (key === 'slug') { const why = slugReason(val); if (why !== null) fail(ln, why); el.slugLine = ln; }
+      el[key] = val;
+    }
+    function parseRel(verb, rest, ln) {
+      const m = /^([^\s:\[\]]+)\s*(?::\s*([^\[\]]*?))?\s*(?:\[([^\[\]]*)\])?$/.exec(rest);
+      if (m === null) fail(ln, 'relationships look like "- calls → trading.orders.gateway: places orders [HTTPS]"');
+      if (!PATH_RE.test(m[1])) fail(ln, `"${m[1]}" is not a path; targets are dot-separated slugs like trading.orders.gateway`);
+      const label = m[2] === undefined || m[2].trim() === '' ? null : m[2].trim();
+      const tech = m[3] === undefined || m[3].trim() === '' ? null : m[3].trim();
+      return { verb, to: m[1], label, tech, line: ln };
+    }
+    function validate(model, layout) {
+      if (model === null) {
+        if (layout !== null && layout.entries.length > 0) fail(layout.line, 'a "# Layout" section needs a "# Model:" section to refer to');
+        return;
+      }
+      const walk = (list) => {
+        const seen = new Map();
+        list.forEach((el) => {
+          if (el.slug === null) fail(el.line, `"${el.name}" needs a "- slug: …" line (its id in paths)`);
+          if (seen.has(el.slug)) fail(el.slugLine, `slug "${el.slug}" is already used by "${seen.get(el.slug)}" at this level`);
+          seen.set(el.slug, el.name);
+          walk(el.children);
+        });
+      };
+      walk(model.children);
+      const idx = index(model);
+      idx.forEach(({ el }, path) => el.rels.forEach((r) => {
+        if (!idx.has(r.to)) fail(r.line, `"${r.to}" is not a path in the model`);
+        if (r.to === path) fail(r.line, 'an element cannot relate to itself');
+        if (isWithin(r.to, path) || isWithin(path, r.to)) fail(r.line, 'an element cannot relate to its own parent or child; the boundary already shows that');
+      }));
+      if (layout !== null) {
+        const seen = new Set();
+        layout.entries.forEach((e) => {
+          if (!idx.has(e.path)) fail(e.line, `"${e.path}" is not in the model; delete this layout line`);
+          if (seen.has(e.path)) fail(e.line, `"${e.path}" is positioned twice`);
+          seen.add(e.path);
+        });
+      }
+    }
+    function parse(md) {
+      if (typeof md !== 'string') throw new Error('bug: parse expects a string');
+      const lines = md.split('\n');
+      const sections = [];
+      let sec = { type: 'prose', heading: null, lines: [], line: 1 };
+      sections.push(sec);
+      let model = null;
+      let layout = null;
+      let stack = [];
+      let el = null;
+      let fence = false;
+      const bucket = () => (sec.type === 'prose' ? sec.lines : sec.type === 'layout' ? sec.notes : el !== null ? el.notes : sec.notes);
+      const touch = (ln) => { if (el !== null) el.endLine = ln; };
+      lines.forEach((raw, i) => {
+        const ln = i + 1;
+        const t = raw.trim();
+        if (/^(```|~~~)/.test(t)) { fence = !fence; bucket().push(raw); touch(ln); return; }
+        if (fence) { bucket().push(raw); if (t !== '') touch(ln); return; }
+        if (t === '') { bucket().push(''); return; }
+        const h1 = /^#\s+(.*)$/.exec(t);
+        if (h1 !== null) {
+          el = null;
+          stack = [];
+          const mm = /^Model\s*:\s*(.*)$/.exec(h1[1]);
+          if (mm !== null) {
+            if (model !== null) fail(ln, 'only one "# Model:" section is allowed');
+            if (mm[1].trim() === '') fail(ln, 'the model title is empty');
+            model = { type: 'model', title: mm[1].trim(), notes: [], children: [], line: ln };
+            sec = model;
+            sections.push(sec);
+            return;
+          }
+          if (h1[1].trim() === 'Layout') {
+            if (layout !== null) fail(ln, 'only one "# Layout" section is allowed');
+            layout = { type: 'layout', notes: [], entries: [], line: ln };
+            sec = layout;
+            sections.push(sec);
+            return;
+          }
+          sec = { type: 'prose', heading: raw, lines: [], line: ln };
+          sections.push(sec);
+          return;
+        }
+        if (sec.type === 'model') {
+          const hm = /^(#{2,})\s+(.*)$/.exec(t);
+          if (hm !== null) {
+            const depth = hm[1].length - 1;
+            if (depth > 3) fail(ln, 'C4 stops at components: ## people and systems, ### containers, #### components');
+            const allowed = lookup(KINDS_BY_DEPTH, depth, 'depth');
+            const kh = /^([A-Za-z ]+?)\s*:\s*(.*)$/.exec(hm[2]);
+            if (kh === null || !allowed.includes(kh[1])) fail(ln, `"${hm[1]}" headings are ${allowed.join(', ')}, written "${hm[1]} ${allowed[0]}: Name"`);
+            const name = kh[2].trim();
+            if (name === '') fail(ln, 'the element name is empty');
+            const node = { kind: kh[1], name, slug: null, desc: null, tech: null, rels: [], notes: [], children: [], line: ln, endLine: ln, slugLine: null };
+            if (depth === 1) model.children.push(node);
+            else {
+              const parent = stack[depth - 2];
+              if (parent === undefined) fail(ln, `a "${hm[1]}" heading needs a "${'#'.repeat(depth)}" parent above it`);
+              if (!childKinds(parent.kind).includes(node.kind)) fail(ln, `a ${parent.kind} cannot contain a ${node.kind}`);
+              parent.children.push(node);
+            }
+            stack = stack.slice(0, depth - 1);
+            stack.push(node);
+            el = node;
+            return;
+          }
+          if (el !== null && /^[-*+]\s/.test(t)) {
+            touch(ln);
+            const f = /^-\s+(slug|desc|tech)\s*:\s*(.*)$/.exec(t);
+            if (f !== null) { setField(el, f[1], f[2].trim(), ln); return; }
+            const r = /^-\s+(.+?)\s*(?:→|->)\s*(.+)$/.exec(t);
+            if (r !== null) { el.rels.push(parseRel(r[1].trim(), r[2].trim(), ln)); return; }
+            fail(ln, 'bullets under an element are "- slug|desc|tech: value" or "- verb → path.to.target: label [tech]"');
+          }
+          bucket().push(raw);
+          touch(ln);
+          return;
+        }
+        if (sec.type === 'layout' && /^[-*+]\s/.test(t)) {
+          const m = /^-\s+([^:\s]+)\s*:\s*(-?\d+)\s*,\s*(-?\d+)$/.exec(t);
+          if (m === null) fail(ln, 'layout lines look like "- trading.orders: 320, 0"');
+          layout.entries.push({ path: m[1], x: Number(m[2]), y: Number(m[3]), line: ln });
+          return;
+        }
+        bucket().push(raw);
+      });
+      if (fence) fail(lines.length, 'a ``` code fence is never closed');
+      validate(model, layout);
+      return { sections };
+    }
+    function tryParse(md) {
+      try { return { ok: true, doc: parse(md) }; } catch (err) {
+        if (err instanceof ParseError) return { ok: false, line: err.line, reason: err.reason };
+        throw err;
+      }
+    }
+
+    // ---------- serialize: document -> canonical markdown (pure) ----------
+    function trimBlank(lines) {
+      let a = 0;
+      let b = lines.length;
+      while (a < b && lines[a].trim() === '') a += 1;
+      while (b > a && lines[b - 1].trim() === '') b -= 1;
+      return lines.slice(a, b);
+    }
+    function serialize(doc) {
+      const out = [];
+      const push = (block) => { if (block.length === 0) return; if (out.length > 0) out.push(''); out.push(...block); };
+      const model = modelOf(doc);
+      doc.sections.forEach((sec) => {
+        if (sec.type === 'prose') {
+          if (sec.heading !== null) push([sec.heading]);
+          push(trimBlank(sec.lines));
+          return;
+        }
+        if (sec.type === 'model') {
+          push([`# Model: ${sec.title}`]);
+          push(trimBlank(sec.notes));
+          const emit = (list, depth) => list.forEach((el) => {
+            const b = [`${'#'.repeat(depth + 1)} ${el.kind}: ${el.name}`, `- slug: ${el.slug}`];
+            if (el.desc !== null) b.push(`- desc: ${el.desc}`);
+            if (el.tech !== null) b.push(`- tech: ${el.tech}`);
+            el.rels.forEach((r) => b.push(relText(r)));
+            push(b);
+            push(trimBlank(el.notes));
+            emit(el.children, depth + 1);
+          });
+          emit(sec.children, 1);
+          return;
+        }
+        if (sec.type === 'layout') {
+          push(['# Layout']);
+          push(trimBlank(sec.notes));
+          const order = model === null ? [] : [...index(model).keys()];
+          const rank = (p) => { const i = order.indexOf(p); if (i < 0) throw new Error(`bug: layout path "${p}" not in model`); return i; };
+          push([...sec.entries].sort((a, b) => rank(a.path) - rank(b.path)).map((e) => `- ${e.path}: ${e.x}, ${e.y}`));
+          return;
+        }
+        throw new Error(`bug: unknown section type "${sec.type}"`);
+      });
+      return `${out.join('\n')}\n`;
+    }
+
+    // ---------- edits: document -> new document (pure) ----------
+    function mutate(doc, fn) {
+      const c = clone(doc);
+      const m = modelOf(c);
+      if (m === null) throw new Error('bug: edit without a model');
+      const result = fn(m, c);
+      return { doc: c, result };
+    }
+    function ensureLayout(doc) {
+      const l = layoutOf(doc);
+      if (l !== null) return l;
+      const fresh = { type: 'layout', notes: [], entries: [], line: 0 };
+      doc.sections.push(fresh);
+      return fresh;
+    }
+    function moveTo(doc, positions) {
+      return mutate(doc, (m, c) => {
+        const l = ensureLayout(c);
+        Object.keys(positions).forEach((p) => {
+          findEl(m, p);
+          const e = l.entries.find((x) => x.path === p);
+          if (e === undefined) l.entries.push({ path: p, x: positions[p].x, y: positions[p].y, line: 0 });
+          else { e.x = positions[p].x; e.y = positions[p].y; }
+        });
+      }).doc;
+    }
+    function setProp(doc, path, prop, value) {
+      if (!['name', 'desc', 'tech', 'kind'].includes(prop)) throw new Error(`bug: setProp cannot set "${prop}"`);
+      return mutate(doc, (m) => {
+        const el = findEl(m, path);
+        if (prop === 'kind') {
+          if (!lookup(KINDS_BY_DEPTH, depthOf(path), 'depth').includes(value)) throw new Error(`bug: "${value}" is not allowed at this depth`);
+          if (el.children.some((k) => !childKinds(value).includes(k.kind))) throw new Error(`bug: a ${value} cannot hold these children`);
+        } else if (prop === 'name') {
+          if (value.trim() === '' || /\n/.test(value)) throw new Error('bug: name must be one non-empty line');
+        } else if (value !== null && (value.trim() === '' || /\n/.test(value))) {
+          throw new Error(`bug: ${prop} must be null or one non-empty line`);
+        }
+        el[prop] = value;
+      }).doc;
+    }
+    const rebase = (p, from, to) => (isWithin(p, from) ? to + p.slice(from.length) : p);
+    function setSlug(doc, path, slug) {
+      const why = slugReason(slug);
+      if (why !== null) throw new Error(`bug: ${why}`);
+      const parent = parentOf(path);
+      const newPath = joinPath(parent, slug);
+      const next = mutate(doc, (m, c) => {
+        const el = findEl(m, path);
+        if (slug !== el.slug && siblingsOf(m, path).some((x) => x.slug === slug)) throw new Error(`bug: slug "${slug}" is taken`);
+        el.slug = slug;
+        index(m).forEach(({ el: x }) => x.rels.forEach((r) => { r.to = rebase(r.to, path, newPath); }));
+        const l = layoutOf(c);
+        if (l !== null) l.entries.forEach((e) => { e.path = rebase(e.path, path, newPath); });
+      }).doc;
+      return { doc: next, newPath };
+    }
+    function addElement(doc, parentPath, kind, at) {
+      const r = mutate(doc, (m, c) => {
+        const list = parentPath === null ? m.children : findEl(m, parentPath).children;
+        const allowed = parentPath === null ? TOP_KINDS : childKinds(findEl(m, parentPath).kind);
+        if (!allowed.includes(kind)) throw new Error(`bug: cannot add a ${kind} here`);
+        const name = uniqueIn(`New ${kind}`, new Set(list.map((x) => x.name)), ' ');
+        const slug = uniqueIn(slugify(name), new Set(list.map((x) => x.slug)), '-');
+        list.push({ kind, name, slug, desc: null, tech: null, rels: [], notes: [], children: [], line: 0, endLine: 0, slugLine: 0 });
+        const path = joinPath(parentPath, slug);
+        ensureLayout(c).entries.push({ path, x: at.x, y: at.y, line: 0 });
+        return path;
+      });
+      return { doc: r.doc, path: r.result };
+    }
+    function removeElement(doc, path) {
+      const r = mutate(doc, (m, c) => {
+        const list = siblingsOf(m, path);
+        const el = findEl(m, path);
+        list.splice(list.indexOf(el), 1);
+        let dropped = 0;
+        index(m).forEach(({ el: x }) => {
+          const before = x.rels.length;
+          x.rels = x.rels.filter((rel) => !isWithin(rel.to, path));
+          dropped += before - x.rels.length;
+        });
+        const l = layoutOf(c);
+        if (l !== null) l.entries = l.entries.filter((e) => !isWithin(e.path, path));
+        return dropped;
+      });
+      return { doc: r.doc, droppedIncoming: r.result };
+    }
+    function relTargetReason(model, owner, to) {
+      if (!PATH_RE.test(to)) return 'Use a dot path of slugs, e.g. trading.orders.gateway';
+      if (!hasPath(model, to)) return `"${to}" is not in the model`;
+      if (to === owner) return 'An element cannot relate to itself';
+      if (isWithin(to, owner) || isWithin(owner, to)) return 'Cannot relate to its own parent or child';
+      return null;
+    }
+    function getRel(model, owner, idx) {
+      const r = findEl(model, owner).rels[idx];
+      if (r === undefined) throw new Error(`bug: no relationship ${idx} on "${owner}"`);
+      return r;
+    }
+    function addRel(doc, owner, to) {
+      const r = mutate(doc, (m) => {
+        const why = relTargetReason(m, owner, to);
+        if (why !== null) throw new Error(`bug: ${why}`);
+        const el = findEl(m, owner);
+        el.rels.push({ verb: 'uses', to, label: null, tech: null, line: 0 });
+        return el.rels.length - 1;
+      });
+      return { doc: r.doc, idx: r.result };
+    }
+    function setRel(doc, owner, idx, patch) {
+      Object.keys(patch).forEach((k) => { if (!['verb', 'label', 'tech', 'to'].includes(k)) throw new Error(`bug: setRel cannot set "${k}"`); });
+      return mutate(doc, (m) => {
+        if (patch.to !== undefined) { const why = relTargetReason(m, owner, patch.to); if (why !== null) throw new Error(`bug: ${why}`); }
+        Object.assign(getRel(m, owner, idx), patch);
+      }).doc;
+    }
+    function removeRel(doc, owner, idx) {
+      return mutate(doc, (m) => { getRel(m, owner, idx); findEl(m, owner).rels.splice(idx, 1); }).doc;
+    }
+    // Removes several relationships at once; indices refer to the document as given.
+    function removeRels(doc, list) {
+      return mutate(doc, (m) => {
+        list.forEach(({ owner, idx }) => getRel(m, owner, idx));
+        [...list].sort((a, b) => b.idx - a.idx).forEach(({ owner, idx }) => { findEl(m, owner).rels.splice(idx, 1); });
+      }).doc;
+    }
+    function setTitle(doc, title) {
+      if (title.trim() === '') throw new Error('bug: empty model title');
+      return mutate(doc, (m) => { m.title = title; }).doc;
+    }
+    function createModel(doc) {
+      if (modelOf(doc) !== null) throw new Error('bug: model already exists');
+      const c = clone(doc);
+      c.sections.push({ type: 'model', title: 'Untitled model', notes: [], children: [], line: 0 });
+      return c;
+    }
+
+    // ---------- geometry (pure) ----------
+    // Expanded elements become boundaries sized to their children; siblings to the right of
+    // / below an expanded box are pushed by its growth so nothing overlaps. `frozen` holds
+    // the push offsets captured at drag start so things do not jump while dragging.
+    function arrange(model, layout, expanded, frozen) {
+      const given = new Map((layout === null ? [] : layout.entries).map((e) => [e.path, { x: e.x, y: e.y }]));
+      const stored = new Map();
+      const shifts = {};
+      const autoSet = new Set();
+      const isOpen = (path, el) => expanded.has(path) && el.children.length > 0;
+      function level(list, parentPath) {
+        const items = list.map((el) => {
+          const path = joinPath(parentPath, el.slug);
+          const open = isOpen(path, el);
+          const inner = open ? level(el.children, path) : null;
+          return {
+            el, path, open, inner,
+            w: open ? PAD * 2 + inner.maxX : NODE_W,
+            h: open ? PAD + inner.maxY + LABEL_PAD : NODE_H,
+            s: given.has(path) ? given.get(path) : null,
+          };
+        });
+        const origin = parentPath === null ? 96 : 0;
+        const placed = items.filter((i) => i.s !== null);
+        const autoTop = placed.length === 0 ? origin : Math.max(...placed.map((i) => i.s.y + NODE_H)) + GAP;
+        let k = 0;
+        items.forEach((i) => {
+          if (i.s === null) {
+            i.s = { x: origin + (k % 4) * (NODE_W + GAP), y: autoTop + Math.floor(k / 4) * (NODE_H + GAP) };
+            autoSet.add(i.path);
+            k += 1;
+          }
+          stored.set(i.path, i.s);
+        });
+        items.forEach((i) => {
+          let dx = 0;
+          let dy = 0;
+          if (frozen !== null && frozen[i.path] !== undefined) { dx = frozen[i.path].dx; dy = frozen[i.path].dy; } else {
+            items.forEach((e) => {
+              if (e === i || !e.open) return;
+              if (i.s.x >= e.s.x + NODE_W) dx += e.w - NODE_W;
+              if (i.s.y >= e.s.y + NODE_H) dy += e.h - NODE_H;
+            });
+          }
+          shifts[i.path] = { dx, dy };
+          i.d = { x: i.s.x + dx, y: i.s.y + dy };
+        });
+        return {
+          items,
+          maxX: items.length === 0 ? 0 : Math.max(...items.map((i) => i.d.x + i.w)),
+          maxY: items.length === 0 ? 0 : Math.max(...items.map((i) => i.d.y + i.h)),
+        };
+      }
+      const rects = new Map();
+      const order = [];
+      const place = (lv, ox, oy) => lv.items.forEach((i) => {
+        const r = { x: ox + i.d.x, y: oy + i.d.y, w: i.w, h: i.h, open: i.open, auto: autoSet.has(i.path) };
+        rects.set(i.path, r);
+        order.push(i.path);
+        if (i.open) place(i.inner, r.x + PAD, r.y + PAD);
+      });
+      place(level(model.children, null), 0, 0);
+      const all = [...rects.values()];
+      const cw = all.length === 0 ? 0 : Math.max(...all.map((r) => r.x + r.w));
+      const ch = all.length === 0 ? 0 : Math.max(...all.map((r) => r.y + r.h));
+      return { rects, order, stored, shifts, autoCount: autoSet.size, contentW: cw + 64, contentH: ch + 64, width: Math.max(1600, cw + 400), height: Math.max(1100, ch + 400) };
+    }
+    // The visible box that stands for `path`: its first collapsed ancestor, or itself.
+    function rep(geo, path) {
+      const chain = [...ancestorsOf(path), path];
+      for (const p of chain) {
+        const r = geo.rects.get(p);
+        if (r === undefined) throw new Error(`bug: "${p}" is not visible`);
+        if (!r.open) return p;
+      }
+      return path;
+    }
+    const center = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
+    function exitPoint(R, from, to) {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const tx = dx > 0 ? (R.x + R.w - from.x) / dx : dx < 0 ? (R.x - from.x) / dx : Infinity;
+      const ty = dy > 0 ? (R.y + R.h - from.y) / dy : dy < 0 ? (R.y - from.y) / dy : Infinity;
+      const t = Math.max(0, Math.min(1, tx, ty));
+      return { x: from.x + dx * t, y: from.y + dy * t };
+    }
+    function edges(model, geo) {
+      const groups = new Map();
+      index(model).forEach(({ el }, owner) => el.rels.forEach((rel, idx) => {
+        const a = rep(geo, owner);
+        const b = rep(geo, rel.to);
+        if (a === b) return;
+        const key = `${a}>${b}`;
+        if (!groups.has(key)) groups.set(key, { key, a, b, rels: [] });
+        groups.get(key).rels.push({ owner, idx, rel });
+      }));
+      const f = (v) => v.toFixed(1);
+      return [...groups.values()].map((g) => {
+        const twoWay = groups.has(`${g.b}>${g.a}`);
+        const off = twoWay ? (g.a < g.b ? -14 : 14) : 0;
+        const A = geo.rects.get(g.a);
+        const B = geo.rects.get(g.b);
+        const lo = center(g.a < g.b ? A : B);
+        const hi = center(g.a < g.b ? B : A);
+        const len = Math.hypot(hi.x - lo.x, hi.y - lo.y);
+        const nx = len === 0 ? 0 : -(hi.y - lo.y) / len;
+        const ny = len === 0 ? 1 : (hi.x - lo.x) / len;
+        const ca = { x: center(A).x + nx * off, y: center(A).y + ny * off };
+        const cb = { x: center(B).x + nx * off, y: center(B).y + ny * off };
+        const p1 = exitPoint(A, ca, cb);
+        const p2 = exitPoint(B, cb, ca);
+        const ul = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const u = ul === 0 ? { x: 1, y: 0 } : { x: (p2.x - p1.x) / ul, y: (p2.y - p1.y) / ul };
+        const tip = { x: p2.x - u.x * 4, y: p2.y - u.y * 4 };
+        const base = { x: tip.x - u.x * 11, y: tip.y - u.y * 11 };
+        const start = { x: p1.x + u.x * 4, y: p1.y + u.y * 4 };
+        return {
+          ...g,
+          line: `M ${f(start.x)} ${f(start.y)} L ${f(base.x)} ${f(base.y)}`,
+          head: `M ${f(tip.x)} ${f(tip.y)} L ${f(base.x - u.y * 5.5)} ${f(base.y + u.x * 5.5)} L ${f(base.x + u.y * 5.5)} ${f(base.y - u.x * 5.5)} Z`,
+          mid: { x: Math.round((p1.x + p2.x) / 2), y: Math.round((p1.y + p2.y) / 2) },
+        };
+      });
+    }
+    function hitTest(geo, p) {
+      const inside = (r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+      const boxes = geo.order.filter((n) => !geo.rects.get(n).open);
+      const leaf = [...boxes].reverse().find((n) => inside(geo.rects.get(n)));
+      if (leaf !== undefined) return leaf;
+      const hits = geo.order.filter((n) => geo.rects.get(n).open && inside(geo.rects.get(n)))
+        .sort((a, b) => geo.rects.get(a).w * geo.rects.get(a).h - geo.rects.get(b).w * geo.rects.get(b).h);
+      return hits.length > 0 ? hits[0] : null;
+    }
+
+    // ---------- markdown line <-> selection (pure) ----------
+    function locate(doc, line) {
+      const model = modelOf(doc);
+      if (model === null) return null;
+      for (const [path, { el }] of index(model)) {
+        const r = el.rels.findIndex((x) => x.line === line);
+        if (r >= 0) return { t: 'rel', owner: path, idx: r };
+        if (line >= el.line && line <= el.endLine) return { t: 'el', path };
+      }
+      const l = layoutOf(doc);
+      if (l !== null) { const e = l.entries.find((x) => x.line === line); if (e !== undefined) return { t: 'el', path: e.path }; }
+      return null;
+    }
+    function selLines(doc, sel, groups) {
+      const model = modelOf(doc);
+      const out = new Set();
+      if (sel === null || model === null) return out;
+      if (sel.t === 'el') { const el = findEl(model, sel.path); for (let i = el.line; i <= el.endLine; i += 1) out.add(i); return out; }
+      if (sel.t === 'rel') { out.add(getRel(model, sel.owner, sel.idx).line); return out; }
+      if (sel.t === 'edge') { const g = groups.find((x) => x.key === sel.key); if (g !== undefined) g.rels.forEach((r) => out.add(r.rel.line)); return out; }
+      throw new Error(`bug: unknown selection type "${sel.t}"`);
+    }
+
+    const SAMPLE = [
+      'Acme trading platform',
+      '',
+      'This file is the source of truth for the C4 model below. Heading depth is nesting: ## people and systems, ### containers, #### components. Every element has a slug; relationships point at dot paths of slugs, and roll up to whatever boxes are visible.',
+      '',
+      '# Model: Acme Trading',
+      '',
+      '## Person: Trader',
+      '- slug: trader',
+      '- desc: Places and manages orders',
+      '- types commands → broker.cli.parser: enters orders [Terminal]',
+      '- uses → broker.portal: places orders [HTTPS]',
+      '',
+      '## System: Broker',
+      '- slug: broker',
+      '- desc: Takes client orders and routes them to Trading',
+      '',
+      '### Container: CLI',
+      '- slug: cli',
+      '- desc: Command-line client for traders',
+      '- tech: Go',
+      '',
+      '#### Component: Command Parser',
+      '- slug: parser',
+      '- desc: Turns typed commands into order requests',
+      '- tech: Go',
+      '- uses → broker.cli.rest-client: sends order requests',
+      '',
+      '#### Component: REST Client',
+      '- slug: rest-client',
+      '- desc: Signs and sends order requests',
+      '- tech: Go net/http',
+      '- calls → trading.orders.gateway: places orders [REST/HTTPS]',
+      '',
+      '### Container: Web Portal',
+      '- slug: portal',
+      '- desc: Browser front end for traders',
+      '- tech: React',
+      '- calls → trading.orders.gateway: places orders [REST/HTTPS]',
+      '',
+      '## System: Trading',
+      '- slug: trading',
+      '- desc: Accepts, matches and settles orders',
+      '',
+      '### Container: Order Service',
+      '- slug: orders',
+      '- desc: Accepts and validates incoming orders',
+      '- tech: Java',
+      '',
+      '#### Component: API Gateway',
+      '- slug: gateway',
+      '- desc: Single entry point for order traffic',
+      '- tech: Spring Cloud Gateway',
+      '- forwards → trading.orders.validator: order requests',
+      '',
+      '#### Component: Order Validator',
+      '- slug: validator',
+      '- desc: Checks limits and order shape',
+      '- tech: Java',
+      '- reads → trading.positions: checks limits [SQL]',
+      '- submits → trading.engine: valid orders [gRPC]',
+      '',
+      '### Container: Matching Engine',
+      '- slug: engine',
+      '- desc: Matches buy and sell orders',
+      '- tech: Rust',
+      '- publishes → trading.events: trade executed [Kafka]',
+      '',
+      '### Container: Settlement',
+      '- slug: settlement',
+      '- desc: Settles executed trades',
+      '- tech: Go',
+      '- consumes → trading.events: trade executed [Kafka]',
+      '- uses → bank: settles funds [SWIFT]',
+      '',
+      '### Database: Positions',
+      '- slug: positions',
+      '- desc: Positions and risk limits',
+      '- tech: PostgreSQL',
+      '',
+      '### Queue: Trade Events',
+      '- slug: events',
+      '- desc: Executed trades',
+      '- tech: Kafka',
+      '',
+      '## External: Clearing Bank',
+      '- slug: bank',
+      '- desc: Holds client funds and settles trades',
+      '',
+      '# Layout',
+      '',
+      '- trader: 96, 96',
+      '- broker: 96, 352',
+      '- broker.cli: 0, 0',
+      '- broker.cli.parser: 0, 0',
+      '- broker.cli.rest-client: 320, 0',
+      '- broker.portal: 320, 0',
+      '- trading: 416, 352',
+      '- trading.orders: 0, 0',
+      '- trading.orders.gateway: 0, 0',
+      '- trading.orders.validator: 320, 0',
+      '- trading.engine: 320, 0',
+      '- trading.settlement: 640, 0',
+      '- trading.positions: 0, 232',
+      '- trading.events: 320, 232',
+      '- bank: 736, 352',
+      '',
+    ].join('\n');
+
+    return Object.freeze({
+      TOP_KINDS, KINDS_BY_DEPTH, CHILD_NOUN, NODE_W, NODE_H, GAP, snap, kindClass, childKinds, typeLine, isPerson, relText,
+      slugReason, joinPath, parentOf, depthOf, isWithin, ancestorsOf, rebase,
+      modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
+      parse, tryParse, serialize,
+      moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, createModel,
+      arrange, edges, hitTest, locate, selLines,
+      SAMPLE,
+    });
+  })();
+
+  static STORAGE_KEY = 'c4-markdown-viewer:v2';
+
+  state = {
+    md: Component.lib.SAMPLE,
+    lastGoodMd: Component.lib.SAMPLE,
+    mode: 'edit',
+    view: 'chart',
+    expanded: [],
+    sel: null,
+    drag: null,
+    link: null,
+    zoom: 1,
+    scrollTop: 0,
+    drafts: {},
+    note: null,
+    save: 'pending',
+    // Undo history: whole markdown snapshots. `histGroup` lets a burst of related edits
+    // (typing, one drag, one field) collapse into a single undo step.
+    past: [],
+    future: [],
+    histGroup: null,
+    histAt: 0,
+  };
+
+  static HISTORY_LIMIT = 200;
+  static COALESCE_MS = 1500;
+
+  histPatch(nextMd, group) {
+    const s = this.state;
+    if (nextMd === s.md) return {};
+    const now = Date.now();
+    const coalesce = group !== null && group === s.histGroup && (group.startsWith('drag:') || now - s.histAt < Component.COALESCE_MS);
+    if (coalesce) return { future: [], histAt: now };
+    return { past: [...s.past, s.md].slice(-Component.HISTORY_LIMIT), future: [], histGroup: group, histAt: now };
+  }
+
+  restore(md, past, future, label) {
+    const r = this.parsedOf(md);
+    this.setState({ md, ...(r.ok ? { lastGoodMd: md } : {}), past, future, histGroup: null, drafts: {}, drag: null, link: null, note: { text: label, tone: 'ok' } });
+  }
+
+  onUndo = () => {
+    const s = this.state;
+    if (s.past.length === 0) { this.flash('Nothing to undo', 'warn'); return; }
+    this.restore(s.past[s.past.length - 1], s.past.slice(0, -1), [s.md, ...s.future], 'Undone');
+  };
+
+  onRedo = () => {
+    const s = this.state;
+    if (s.future.length === 0) { this.flash('Nothing to redo', 'warn'); return; }
+    this.restore(s.future[0], [...s.past, s.md].slice(-Component.HISTORY_LIMIT), s.future.slice(1), 'Redone');
+  };
+
+  onKeyDown = (e) => {
+    const mod = e.metaKey || e.ctrlKey;
+    const k = e.key.toLowerCase();
+    if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) this.onRedo(); else this.onUndo(); return; }
+    if (mod && k === 'y') { e.preventDefault(); this.onRedo(); return; }
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    const t = e.target;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable) return;
+    if (this.state.view === 'source' || this.state.sel === null) return;
+    e.preventDefault();
+    this.deleteSelection();
+  };
+
+  deleteSelection() {
+    const L = Component.lib;
+    const ed = this.editable();
+    if (ed === null) return;
+    const sel = this.state.sel;
+    if (!this.selExists(ed.doc, sel)) { this.setState({ sel: null }); return; }
+    if (sel.t === 'el') {
+      const name = L.findEl(ed.model, sel.path).name;
+      const r = L.removeElement(ed.doc, sel.path);
+      const extra = r.droppedIncoming === 0 ? '' : ` and ${r.droppedIncoming} relationship${r.droppedIncoming === 1 ? '' : 's'} pointing at it`;
+      this.commit(r.doc, { sel: null, drafts: {}, note: { text: `Deleted ${name}${extra}`, tone: 'ok' } });
+      return;
+    }
+    if (sel.t === 'rel') {
+      this.commit(L.removeRel(ed.doc, sel.owner, sel.idx), { sel: null, drafts: {}, note: { text: 'Deleted relationship', tone: 'ok' } });
+      return;
+    }
+    if (sel.t === 'edge') {
+      const g = this._groups.find((x) => x.key === sel.key);
+      if (g === undefined) throw new Error('bug: selected edge group vanished');
+      this.commit(L.removeRels(ed.doc, g.rels.map((r) => ({ owner: r.owner, idx: r.idx }))), { sel: null, drafts: {}, note: { text: `Deleted ${g.rels.length} relationships`, tone: 'ok' } });
+      return;
+    }
+    throw new Error(`bug: unknown selection type "${sel.t}"`);
+  }
+
+  focusVp() { this.query('.vp').focus({ preventScroll: true }); }
+
+  // ---------- edge: DOM, storage, clipboard ----------
+  query(selector) {
+    const n = document.querySelector(selector);
+    if (n === null) throw new Error(`bug: missing element ${selector}`);
+    return n;
+  }
+
+  componentDidMount() {
+    let stored;
+    try { stored = window.localStorage.getItem(Component.STORAGE_KEY); } catch (err) {
+      this.setState({ save: 'unavailable' });
+      return;
+    }
+    if (stored === null) { this.persist(this.state.md); return; }
+    const r = this.parsedOf(stored);
+    this.setState({ md: stored, lastGoodMd: r.ok ? stored : null, save: 'saved' });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.md !== this.state.md && this.state.save !== 'unavailable') this.persist(this.state.md);
+    if (this._scrollSel === true) {
+      this._scrollSel = false;
+      if (this.state.view !== 'chart') this.scrollMarkdownToSelection();
+    }
+  }
+
+  persist(md) {
+    try {
+      window.localStorage.setItem(Component.STORAGE_KEY, md);
+      if (this.state.save !== 'saved') this.setState({ save: 'saved' });
+    } catch (err) {
+      this.setState({ save: 'unavailable' });
+    }
+  }
+
+  scrollMarkdownToSelection() {
+    const c = this.current();
+    if (!c.ok || !this.selExists(c.doc, this.state.sel)) return;
+    const lines = [...Component.lib.selLines(c.doc, this.state.sel, this._groups === undefined ? [] : this._groups)];
+    if (lines.length === 0) return;
+    const ta = this.query('textarea.ta');
+    const top = (Math.min(...lines) - 1) * 20;
+    if (top < ta.scrollTop || top > ta.scrollTop + ta.clientHeight - 80) ta.scrollTop = Math.max(0, top - 80);
+  }
+
+  // ---------- derived state ----------
+  parsedOf(md) {
+    if (this._memo === undefined) this._memo = new Map();
+    const hit = this._memo.get(md);
+    if (hit !== undefined) return hit;
+    const res = Component.lib.tryParse(md);
+    if (this._memo.size > 8) this._memo.clear();
+    this._memo.set(md, res);
+    return res;
+  }
+
+  current() {
+    const res = this.parsedOf(this.state.md);
+    if (res.ok) return { ok: true, res, doc: res.doc };
+    if (this.state.lastGoodMd === null) return { ok: false, res, doc: null };
+    const good = this.parsedOf(this.state.lastGoodMd);
+    if (!good.ok) throw new Error('bug: lastGoodMd must always parse');
+    return { ok: false, res, doc: good.doc };
+  }
+
+  selExists(doc, sel) {
+    const L = Component.lib;
+    if (sel === null || doc === null) return false;
+    const model = L.modelOf(doc);
+    if (model === null) return false;
+    const idx = L.index(model);
+    if (sel.t === 'el') return idx.has(sel.path);
+    if (sel.t === 'rel') return idx.has(sel.owner) && idx.get(sel.owner).el.rels[sel.idx] !== undefined;
+    if (sel.t === 'edge') return this._groups !== undefined && this._groups.some((g) => g.key === sel.key);
+    throw new Error(`bug: unknown selection type "${sel.t}"`);
+  }
+
+  docPatch(doc, extra) {
+    const md = Component.lib.serialize(doc);
+    const check = this.parsedOf(md);
+    if (!check.ok) throw new Error(`bug: serializer wrote markdown that does not parse (line ${check.line}: ${check.reason})`);
+    const group = this._group === undefined ? null : this._group;
+    this._group = undefined;
+    return { md, lastGoodMd: md, note: null, ...this.histPatch(md, group), ...extra };
+  }
+
+  commit(doc, extra) { this.setState(this.docPatch(doc, extra)); }
+
+  editable() {
+    const c = this.current();
+    if (!c.ok) { this.flash('Fix the markdown error before editing the diagram', 'bad'); return null; }
+    if (this.state.mode !== 'edit') { this.flash('Switch to Edit to change the model', 'warn'); return null; }
+    return { doc: c.doc, model: Component.lib.modelOf(c.doc) };
+  }
+
+  flash(text, tone) { this.setState({ note: { text, tone } }); }
+
+  withAncestors(expanded, path) {
+    const set = new Set(expanded);
+    Component.lib.ancestorsOf(path).forEach((p) => set.add(p));
+    return [...set];
+  }
+
+  select(sel) {
+    this._scrollSel = true;
+    const expanded = sel !== null && sel.t === 'el' ? this.withAncestors(this.state.expanded, sel.path) : this.state.expanded;
+    this.setState({ sel, drafts: {}, expanded });
+  }
+
+  toggle(path) {
+    const set = new Set(this.state.expanded);
+    if (set.has(path)) set.delete(path); else set.add(path);
+    this.setState({ expanded: [...set] });
+  }
+
+  pt(e) {
+    const r = this.query('.host').getBoundingClientRect();
+    return { x: (e.clientX - r.left) / this.state.zoom, y: (e.clientY - r.top) / this.state.zoom };
+  }
+
+  capture(e) { this.query('.vp').setPointerCapture(e.pointerId); }
+
+  stop = (e) => { e.stopPropagation(); };
+
+  // ---------- markdown pane handlers ----------
+  caretPatch(md, pos, res) {
+    if (!res.ok) return {};
+    const line = md.slice(0, pos).split('\n').length;
+    const sel = Component.lib.locate(res.doc, line);
+    if (sel === null || JSON.stringify(sel) === JSON.stringify(this.state.sel)) return {};
+    const expanded = sel.t === 'el' ? this.withAncestors(this.state.expanded, sel.path) : this.withAncestors(this.state.expanded, sel.owner);
+    return { sel, drafts: {}, expanded };
+  }
+
+  onMdChange = (e) => {
+    const md = e.target.value;
+    const res = this.parsedOf(md);
+    this.setState({ md, ...(res.ok ? { lastGoodMd: md } : {}), note: null, ...this.histPatch(md, 'text'), ...this.caretPatch(md, e.target.selectionStart, res) });
+  };
+
+  onCaret = (e) => {
+    const t = e.target;
+    const patch = this.caretPatch(t.value, t.selectionStart, this.parsedOf(t.value));
+    if (Object.keys(patch).length > 0) this.setState(patch);
+  };
+
+  onTaScroll = (e) => { this.setState({ scrollTop: e.target.scrollTop }); };
+
+  onCopy = () => {
+    if (navigator.clipboard === undefined) { this.flash('Copy failed: the clipboard is not available here; select the text and copy it instead', 'bad'); return; }
+    navigator.clipboard.writeText(this.state.md).then(
+      () => this.flash('Markdown copied', 'ok'),
+      (err) => this.flash(`Copy failed: ${err.message}`, 'bad'),
+    );
+  };
+
+  onImport = (e) => {
+    const input = e.target;
+    const file = input.files[0];
+    if (file === undefined) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const md = String(reader.result).replace(/\r\n?/g, '\n');
+      const res = this.parsedOf(md);
+      this.setState({ md, lastGoodMd: res.ok ? md : this.state.lastGoodMd, expanded: [], sel: null, drafts: {}, ...this.histPatch(md, null), note: { text: `Imported ${file.name}`, tone: 'ok' } });
+      input.value = '';
+    };
+    reader.onerror = () => { this.flash(`Import failed: ${reader.error === null ? 'unknown error' : reader.error.message}`, 'bad'); input.value = ''; };
+    reader.readAsText(file);
+  };
+
+  onReset = () => {
+    const md = Component.lib.SAMPLE;
+    this.setState({ md, lastGoodMd: md, expanded: [], sel: null, drafts: {}, ...this.histPatch(md, null), note: { text: 'Sample loaded', tone: 'ok' } });
+  };
+
+  // ---------- toolbar handlers ----------
+  onPresent = () => this.setState({ mode: 'present', drag: null, link: null, drafts: {} });
+  onEdit = () => this.setState({ mode: 'edit' });
+  setView(view) {
+    if (!['source', 'split', 'chart'].includes(view)) throw new Error(`bug: unknown view "${view}"`);
+    this._scrollSel = view !== 'chart';
+    this.setState({ view, drag: null, link: null });
+  }
+  onViewSource = () => this.setView('source');
+  onViewSplit = () => this.setView('split');
+  onViewChart = () => this.setView('chart');
+
+  allParents() {
+    const c = this.current();
+    if (c.doc === null) return [];
+    const model = Component.lib.modelOf(c.doc);
+    if (model === null) return [];
+    return [...Component.lib.index(model).entries()].filter(([, v]) => v.el.children.length > 0).map(([p]) => p);
+  }
+  onExpandAll = () => this.setState({ expanded: this.allParents() });
+  onCollapseAll = () => this.setState({ expanded: [], sel: null, drafts: {} });
+
+  setZoom(z) { this.setState({ zoom: Math.round(Math.min(2, Math.max(0.3, z)) * 100) / 100 }); }
+  onZoomIn = () => this.setZoom(this.state.zoom + 0.1);
+  onZoomOut = () => this.setZoom(this.state.zoom - 0.1);
+  onZoomReset = () => this.setZoom(1);
+  onFit = () => {
+    if (this._geo === undefined || this._geo === null) return;
+    const vp = this.query('.vp');
+    const z = Math.min(vp.clientWidth / this._geo.contentW, vp.clientHeight / this._geo.contentH);
+    this.setZoom(Math.min(1.5, z));
+    vp.scrollLeft = 0;
+    vp.scrollTop = 0;
+  };
+
+  onCreateModel = () => {
+    const c = this.current();
+    if (!c.ok) { this.flash('Fix the markdown error first', 'bad'); return; }
+    this.commit(Component.lib.createModel(c.doc), { mode: 'edit' });
+  };
+
+  // ---------- diagram handlers ----------
+  startDrag(e, path) {
+    if (this.state.mode !== 'edit') return;
+    e.stopPropagation();
+    this.focusVp();
+    const L = Component.lib;
+    const ed = this.editable();
+    if (ed === null) { this.select({ t: 'el', path }); return; }
+    e.preventDefault();
+    const geo = this._geo;
+    const s = geo.stored.get(path);
+    if (s === undefined) throw new Error(`bug: "${path}" has no position`);
+    this.capture(e);
+    this._scrollSel = true;
+    this._dragSeq = (this._dragSeq === undefined ? 0 : this._dragSeq) + 1;
+    this.setState({ sel: { t: 'el', path }, drafts: {}, drag: { id: this._dragSeq, path, start: this.pt(e), orig: { x: s.x, y: s.y }, frozen: { ...geo.shifts }, last: '', minY: L.depthOf(path) === 1 && L.isPerson(L.findEl(ed.model, path)) ? 48 : 0 } });
+  }
+
+  startLink(e, path) {
+    e.stopPropagation();
+    if (this.state.mode !== 'edit') return;
+    this.focusVp();
+    const ed = this.editable();
+    if (ed === null) return;
+    e.preventDefault();
+    this.capture(e);
+    const p = this.pt(e);
+    this.setState({ sel: { t: 'el', path }, drafts: {}, link: { from: path, x: p.x, y: p.y } });
+  }
+
+  onVpDown = () => { this.focusVp(); if (this.state.sel !== null) this.setState({ sel: null, drafts: {} }); };
+
+  onVpMove = (e) => {
+    const L = Component.lib;
+    const s = this.state;
+    if (s.drag !== null) {
+      const p = this.pt(e);
+      const pos = { x: Math.max(0, L.snap(s.drag.orig.x + p.x - s.drag.start.x)), y: Math.max(s.drag.minY, L.snap(s.drag.orig.y + p.y - s.drag.start.y)) };
+      const key = `${pos.x},${pos.y}`;
+      if (key === s.drag.last) return;
+      const ed = this.editable();
+      if (ed === null) { this.setState({ drag: null }); return; }
+      this._group = `drag:${s.drag.id}`;
+      this.commit(L.moveTo(ed.doc, { [s.drag.path]: pos }), { drag: { ...s.drag, last: key } });
+      return;
+    }
+    if (s.link !== null) {
+      const p = this.pt(e);
+      this.setState({ link: { ...s.link, x: p.x, y: p.y } });
+    }
+  };
+
+  onVpUp = (e) => {
+    const L = Component.lib;
+    const s = this.state;
+    if (s.link !== null) {
+      const ed = this.editable();
+      if (ed === null) { this.setState({ link: null }); return; }
+      const hit = L.hitTest(this._geo, this.pt(e));
+      if (hit === null) { this.setState({ link: null, note: { text: 'Drop on another box to create a relationship', tone: 'warn' } }); return; }
+      const why = L.relTargetReason(ed.model, s.link.from, hit);
+      if (why !== null) { this.setState({ link: null, note: { text: why, tone: 'warn' } }); return; }
+      const r = L.addRel(ed.doc, s.link.from, hit);
+      this._scrollSel = true;
+      this.commit(r.doc, { link: null, sel: { t: 'rel', owner: s.link.from, idx: r.idx }, drafts: {} });
+      return;
+    }
+    if (s.drag !== null) this.setState({ drag: null });
+  };
+
+  onVpCancel = () => { this.setState({ drag: null, link: null }); };
+
+  addTarget(model) {
+    const L = Component.lib;
+    const s = this.state.sel;
+    if (s === null || s.t !== 'el' || !L.index(model).has(s.path)) return null;
+    const el = L.findEl(model, s.path);
+    if (L.childKinds(el.kind).length > 0) return s.path;
+    return L.parentOf(s.path);
+  }
+
+  addKind(kind, parentPath) {
+    const L = Component.lib;
+    const ed = this.editable();
+    if (ed === null) return;
+    if (ed.model === null) throw new Error('bug: add element without a model');
+    const geo = this._geo;
+    let at;
+    if (parentPath === null) {
+      const vp = this.query('.vp');
+      const z = this.state.zoom;
+      at = { x: Math.max(0, L.snap((vp.scrollLeft + vp.clientWidth / 2) / z - L.NODE_W / 2)), y: Math.max(48, L.snap((vp.scrollTop + vp.clientHeight / 2) / z - L.NODE_H / 2)) };
+    } else {
+      const sibs = L.findEl(ed.model, parentPath).children.map((x) => geo.stored.get(L.joinPath(parentPath, x.slug))).filter((p) => p !== undefined);
+      at = sibs.length === 0 ? { x: 0, y: 0 } : { x: 0, y: Math.max(...sibs.map((p) => p.y)) + L.NODE_H + L.GAP };
+    }
+    const r = L.addElement(ed.doc, parentPath, kind, at);
+    this._scrollSel = true;
+    const expanded = parentPath === null ? this.state.expanded : this.withAncestors([...this.state.expanded, parentPath], parentPath);
+    this.commit(r.doc, { sel: { t: 'el', path: r.path }, drafts: {}, expanded, note: { text: parentPath === null ? `Added ${kind}` : `Added ${kind} inside ${parentPath}`, tone: 'ok' } });
+  }
+
+  focusName() {
+    window.setTimeout(() => { const n = document.querySelector('#f-name'); if (n === null) return; n.focus(); n.select(); }, 40);
+  }
+
+  // A text field that keeps the typed text as a draft (so spaces and invalid
+  // intermediate states survive re-parsing) and commits only valid values.
+  field(key, current, validate, commit) {
+    const dr = this.state.drafts[key];
+    const value = dr === undefined ? current : dr.value;
+    const err = dr === undefined ? null : dr.err;
+    return {
+      value,
+      err: err === null ? '' : err,
+      hasErr: err !== null,
+      cls: err === null ? 'inp' : 'inp bad',
+      onChange: (ev) => {
+        const v = ev.target.value;
+        const why = validate(v);
+        const drafts = { ...this.state.drafts, [key]: { value: v, err: why } };
+        if (why !== null) { this.setState({ drafts }); return; }
+        const ed = this.editable();
+        if (ed === null) { this.setState({ drafts }); return; }
+        this._group = `field:${key}`;
+        this.setState({ ...commit(v, ed), drafts });
+      },
+      onBlur: () => {
+        const rest = { ...this.state.drafts };
+        delete rest[key];
+        this.setState({ drafts: rest });
+      },
+    };
+  }
+
+  // ---------- render ----------
+  renderVals() {
+    const L = Component.lib;
+    const s = this.state;
+    const showGrid = this.props.showGrid ?? true;
+    const isEdit = s.mode === 'edit';
+    const c = this.current();
+    const doc = c.doc;
+    const model = doc === null ? null : L.modelOf(doc);
+    const noEdit = !c.ok;
+    const idx = model === null ? new Map() : L.index(model);
+    const expanded = new Set(s.expanded.filter((p) => idx.has(p)));
+    const geo = model === null ? null : L.arrange(model, L.layoutOf(doc), expanded, s.drag === null ? null : s.drag.frozen);
+    const groups = geo === null ? [] : L.edges(model, geo);
+    this._geo = geo;
+    this._groups = groups;
+    const sel = this.selExists(doc, s.sel) ? s.sel : null;
+
+    const selPath = sel !== null && sel.t === 'el' ? sel.path : null;
+    const touches = (g) => selPath !== null && g.rels.some((r) => L.isWithin(r.owner, selPath) || L.isWithin(r.rel.to, selPath));
+    const groupSelected = (g) => sel !== null && ((sel.t === 'edge' && sel.key === g.key) || (sel.t === 'rel' && g.rels.some((r) => r.owner === sel.owner && r.idx === sel.idx)));
+
+    // markdown backdrop
+    const hl = c.ok && doc !== null ? L.selLines(doc, sel, groups) : new Set();
+    const errLine = c.ok ? null : c.res.line;
+    const lines = s.md.split('\n').map((_, i) => {
+      const n = i + 1;
+      return { n, cls: n === errLine ? 'ln err' : hl.has(n) ? 'ln hl' : 'ln' };
+    });
+
+    const addParent = model === null ? null : this.addTarget(model);
+    const addKinds = model === null ? [] : addParent === null ? L.TOP_KINDS : L.childKinds(L.findEl(model, addParent).kind);
+    const palette = addKinds.map((k) => ({ label: k, sw: `sw ${L.kindClass(k)}`, add: () => this.addKind(k, addParent) }));
+
+    const nodes = geo === null ? [] : geo.order.filter((p) => !geo.rects.get(p).open).map((path) => {
+      const el = idx.get(path).el;
+      const r = geo.rects.get(path);
+      const kids = el.children.length;
+      const noun = kids > 0 ? L.CHILD_NOUN[L.depthOf(path)] : null;
+      if (kids > 0 && noun === undefined) throw new Error(`bug: no child noun for depth ${L.depthOf(path)}`);
+      const dim = selPath !== null && !L.isWithin(path, selPath) && !L.isWithin(selPath, path) && !groups.some((g) => touches(g) && (g.a === path || g.b === path));
+      return {
+        name: el.name, x: r.x, y: r.y, w: r.w, h: r.h, auto: r.auto,
+        cls: `node ${L.kindClass(el.kind)}${kids > 0 ? ' kids' : ''}${selPath === path ? ' sel' : ''}${dim && !isEdit ? ' dim' : ''}`,
+        isPerson: L.isPerson(el), typeLine: L.typeLine(el),
+        desc: el.desc === null ? '' : el.desc, hasDesc: el.desc !== null,
+        hasKids: kids > 0, kidsLabel: kids > 0 ? `${kids} ${kids === 1 ? noun[0] : noun[1]}` : '',
+        expand: (ev) => { ev.stopPropagation(); this.toggle(path); },
+        down: (ev) => this.startDrag(ev, path),
+        click: () => { if (s.mode === 'present') { if (kids > 0) this.toggle(path); else this.select({ t: 'el', path }); } },
+        dbl: () => { if (s.mode !== 'edit') return; if (kids > 0) this.toggle(path); else { this.select({ t: 'el', path }); this.focusName(); } },
+        linkDown: (ev) => this.startLink(ev, path),
+      };
+    });
+    const bounds = geo === null ? [] : geo.order.filter((p) => geo.rects.get(p).open).map((path) => {
+      const el = idx.get(path).el;
+      const r = geo.rects.get(path);
+      const on = selPath === path;
+      return {
+        name: el.name, x: r.x, y: r.y, w: r.w, h: r.h, lx: r.x + 12, ly: r.y + r.h - 44,
+        cls: `bound${L.depthOf(path) > 1 ? ' d2' : ''}${on ? ' sel' : ''}`, lcls: on ? 'bound-label sel' : 'bound-label',
+        typeLine: L.typeLine(el),
+        down: (ev) => this.startDrag(ev, path),
+        click: () => { if (s.mode === 'present') this.select({ t: 'el', path }); },
+        collapse: (ev) => { ev.stopPropagation(); this.toggle(path); },
+      };
+    });
+    const edges = groups.map((g) => {
+      const on = groupSelected(g);
+      const dim = selPath !== null && !touches(g);
+      const multi = g.rels.length > 1;
+      const techs = [...new Set(g.rels.map((r) => r.rel.tech).filter((t) => t !== null))];
+      return {
+        line: g.line, head: g.head, lx: g.mid.x, ly: g.mid.y,
+        text: multi ? `${g.rels.length} relationships` : g.rels[0].rel.label !== null ? g.rels[0].rel.label : g.rels[0].rel.verb,
+        tech: techs.join(', '), hasTech: techs.length > 0,
+        cls: `edge${multi ? ' multi' : ''}${on ? ' sel' : ''}${dim && !on ? ' dim' : ''}`,
+        lcls: `elabel${multi ? ' multi' : ''}${on ? ' sel' : ''}${dim && !on ? ' dim' : ''}`,
+        down: (ev) => {
+          ev.stopPropagation();
+          this.focusVp();
+          this.select(multi ? { t: 'edge', key: g.key } : { t: 'rel', owner: g.rels[0].owner, idx: g.rels[0].idx });
+        },
+      };
+    });
+
+    let ghostD = '';
+    if (s.link !== null && geo !== null && geo.rects.has(s.link.from)) {
+      const r = geo.rects.get(s.link.from);
+      ghostD = `M ${r.x + r.w} ${r.y + r.h / 2} L ${s.link.x.toFixed(1)} ${s.link.y.toFixed(1)}`;
+    }
+
+    const W = geo === null ? 1600 : geo.width;
+    const H = geo === null ? 1100 : geo.height;
+    const relCount = [...idx.values()].reduce((a, v) => a + v.el.rels.length, 0);
+    const counts = model === null ? '' : `${idx.size} elements · ${relCount} relationships · ${nodes.length} boxes shown`;
+
+    // present-mode detail card
+    let card = { show: false };
+    if (!isEdit && selPath !== null) {
+      const el = idx.get(selPath).el;
+      const outs = el.rels.length;
+      const ins = [...idx.values()].reduce((a, v) => a + v.el.rels.filter((r) => r.to === selPath).length, 0);
+      card = {
+        show: true, name: el.name, typeLine: L.typeLine(el), sw: `sw ${L.kindClass(el.kind)}`,
+        desc: el.desc === null ? '' : el.desc, hasDesc: el.desc !== null,
+        rels: `${outs} outgoing, ${ins} incoming relationship${ins === 1 ? '' : 's'}`,
+        hasKids: el.children.length > 0, toggleLabel: expanded.has(selPath) ? 'Collapse' : 'Expand',
+        toggle: () => this.toggle(selPath),
+      };
+    }
+
+    return {
+      appCls: isEdit ? 'app' : 'app present',
+      isEdit, presentCls: isEdit ? '' : 'on', editCls: isEdit ? 'on' : '',
+      onKeyDown: this.onKeyDown, onUndo: this.onUndo, onRedo: this.onRedo,
+      noUndo: s.past.length === 0, noRedo: s.future.length === 0,
+      showSource: s.view !== 'chart', showChart: s.view !== 'source',
+      viewSourceCls: s.view === 'source' ? 'on' : '', viewSplitCls: s.view === 'split' ? 'on' : '', viewChartCls: s.view === 'chart' ? 'on' : '',
+      onViewSource: this.onViewSource, onViewSplit: this.onViewSplit, onViewChart: this.onViewChart,
+      onPresent: this.onPresent, onEdit: this.onEdit,
+      modelTitle: model === null ? '' : model.title,
+      md: s.md, lines, scrollTop: s.scrollTop,
+      onMdChange: this.onMdChange, onCaret: this.onCaret, onTaScroll: this.onTaScroll,
+      onCopy: this.onCopy, onImport: this.onImport, onReset: this.onReset,
+      onExpandAll: this.onExpandAll, onCollapseAll: this.onCollapseAll,
+      addLabel: addParent === null ? 'Add:' : `Add to ${idx.get(addParent).el.name}:`,
+      palette, noEdit, noModel: model === null, noAdd: noEdit || model === null,
+      onZoomIn: this.onZoomIn, onZoomOut: this.onZoomOut, onZoomReset: this.onZoomReset, onFit: this.onFit,
+      zoom: s.zoom, zoomPct: Math.round(s.zoom * 100),
+      stale: !c.ok, errLine: errLine === null ? '' : errLine, errReason: c.ok ? '' : c.res.reason,
+      empty: model === null, onCreateModel: this.onCreateModel,
+      onVpDown: this.onVpDown, onVpMove: this.onVpMove, onVpUp: this.onVpUp, onVpCancel: this.onVpCancel,
+      stop: this.stop,
+      W, H, sizerW: Math.ceil(W * s.zoom), sizerH: Math.ceil(H * s.zoom),
+      hostCls: `host${showGrid ? ' grid' : ''}${c.ok ? '' : ' stale'}`,
+      nodes, bounds, edges,
+      linking: s.link !== null, ghostD,
+      card,
+      insp: this.inspector(model, idx, sel, groups, counts, expanded),
+      status: {
+        sync: c.ok ? 'In sync with markdown' : `Line ${c.res.line}: ${c.res.reason}`,
+        syncCls: c.ok ? 'ok' : 'bad',
+        counts,
+        hasAuto: geo !== null && geo.autoCount > 0,
+        auto: geo === null ? '' : `${geo.autoCount} auto-placed (drag to pin)`,
+        save: s.save === 'saved' ? 'Saved in this browser' : s.save === 'unavailable' ? 'Not saved: browser storage is unavailable here; copy the markdown to keep it' : 'Saving…',
+        hasNote: s.note !== null, note: s.note === null ? '' : s.note.text,
+        noteCls: s.note === null ? '' : s.note.tone,
+      },
+    };
+  }
+
+  inspector(model, idx, sel, groups, counts, expanded) {
+    const L = Component.lib;
+    const base = { isNone: false, isEl: false, isRel: false, isEdge: false, hasModel: model !== null };
+    const relLabel = (r) => (r.label !== null ? r.label : r.verb);
+
+    if (sel === null) {
+      if (model === null) return { ...base, isNone: true };
+      return {
+        ...base, isNone: true, counts,
+        title: this.field('model:title', model.title,
+          (v) => (v.trim() === '' ? 'Title is required' : null),
+          (v, ed) => this.docPatch(L.setTitle(ed.doc, v.trim()), {})),
+      };
+    }
+
+    if (sel.t === 'el') {
+      const path = sel.path;
+      const el = idx.get(path).el;
+      const textOrNull = (v) => (v.trim() === '' ? null : v.trim());
+      const depthKinds = L.KINDS_BY_DEPTH[L.depthOf(path)];
+      if (depthKinds === undefined) throw new Error('bug: element deeper than components');
+      const outs = el.rels.map((r, i) => ({
+        other: r.to, text: relLabel(r),
+        pick: () => this.select({ t: 'rel', owner: path, idx: i }),
+        del: () => { const ed = this.editable(); if (ed !== null) this.commit(L.removeRel(ed.doc, path, i), {}); },
+      }));
+      const ins = [];
+      idx.forEach(({ el: x }, p) => x.rels.forEach((r, i) => { if (r.to === path) ins.push({ other: p, text: relLabel(r), pick: () => this.select({ t: 'rel', owner: p, idx: i }) }); }));
+      return {
+        ...base, isEl: true, path,
+        sw: `sw ${L.kindClass(el.kind)}`, kind: el.kind,
+        name: this.field('el:name', el.name,
+          (v) => (v.trim() === '' ? 'Name is required' : null),
+          (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'name', v.trim()), {})),
+        slug: this.field('el:slug', el.slug,
+          (v) => {
+            const why = L.slugReason(v);
+            if (why !== null) return why;
+            return v !== el.slug && L.siblingsOf(model, path).some((x) => x.slug === v) ? `"${v}" is already used at this level` : null;
+          },
+          (v, ed) => {
+            const r = L.setSlug(ed.doc, path, v);
+            return this.docPatch(r.doc, { sel: { t: 'el', path: r.newPath }, expanded: this.state.expanded.map((p) => L.rebase(p, path, r.newPath)) });
+          }),
+        kinds: depthKinds.map((k) => {
+          const fits = el.children.every((x) => L.childKinds(k).includes(x.kind));
+          return {
+            label: k, sw: `sw ${L.kindClass(k)}`, cls: k === el.kind ? 'chip on' : 'chip', off: this.current().ok === false || !fits,
+            pick: () => { const ed = this.editable(); if (ed !== null) this.commit(L.setProp(ed.doc, path, 'kind', k), {}); },
+          };
+        }),
+        desc: this.field('el:desc', el.desc === null ? '' : el.desc, () => null,
+          (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'desc', textOrNull(v)), {})),
+        showTech: !L.isPerson(el),
+        tech: this.field('el:tech', el.tech === null ? '' : el.tech, () => null,
+          (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'tech', textOrNull(v)), {})),
+        hasKids: el.children.length > 0, kidCount: el.children.length,
+        kids: el.children.map((k) => ({ label: k.name, pick: () => this.select({ t: 'el', path: L.joinPath(path, k.slug) }) })),
+        toggleLabel: expanded.has(path) ? 'Collapse on diagram' : 'Expand on diagram',
+        toggle: () => this.toggle(path),
+        outs, outCount: outs.length, noOuts: outs.length === 0,
+        ins, inCount: ins.length, hasIns: ins.length > 0,
+        delLabel: el.children.length > 0 ? 'Delete element and everything inside' : 'Delete element',
+        del: () => {
+          const ed = this.editable();
+          if (ed === null) return;
+          const r = L.removeElement(ed.doc, path);
+          const extra = r.droppedIncoming === 0 ? '' : ` and ${r.droppedIncoming} relationship${r.droppedIncoming === 1 ? '' : 's'} pointing at it`;
+          this.commit(r.doc, { sel: null, drafts: {}, note: { text: `Deleted ${el.name}${extra}`, tone: 'ok' } });
+        },
+      };
+    }
+
+    if (sel.t === 'rel') {
+      const r = L.getRel(model, sel.owner, sel.idx);
+      const noBrackets = (v) => (/[\[\]]/.test(v) ? 'Cannot contain [ or ]' : null);
+      return {
+        ...base, isRel: true,
+        from: sel.owner,
+        pickFrom: () => this.select({ t: 'el', path: sel.owner }),
+        to: this.field('rel:to', r.to,
+          (v) => L.relTargetReason(model, sel.owner, v.trim()),
+          (v, ed) => this.docPatch(L.setRel(ed.doc, sel.owner, sel.idx, { to: v.trim() }), {})),
+        verb: this.field('rel:verb', r.verb,
+          (v) => {
+            if (v.trim() === '') return 'Verb is required';
+            if (/→|->/.test(v)) return 'Cannot contain → or ->';
+            if (/^\s*(slug|desc|tech)\s*:/.test(v)) return 'Cannot start with slug:, desc: or tech:';
+            return null;
+          },
+          (v, ed) => this.docPatch(L.setRel(ed.doc, sel.owner, sel.idx, { verb: v.trim() }), {})),
+        label: this.field('rel:label', r.label === null ? '' : r.label, noBrackets,
+          (v, ed) => this.docPatch(L.setRel(ed.doc, sel.owner, sel.idx, { label: v.trim() === '' ? null : v.trim() }), {})),
+        rtech: this.field('rel:tech', r.tech === null ? '' : r.tech, noBrackets,
+          (v, ed) => this.docPatch(L.setRel(ed.doc, sel.owner, sel.idx, { tech: v.trim() === '' ? null : v.trim() }), {})),
+        preview: L.relText(r),
+        del: () => { const ed = this.editable(); if (ed !== null) this.commit(L.removeRel(ed.doc, sel.owner, sel.idx), { sel: { t: 'el', path: sel.owner }, drafts: {} }); },
+      };
+    }
+
+    if (sel.t === 'edge') {
+      const g = groups.find((x) => x.key === sel.key);
+      if (g === undefined) throw new Error('bug: selected edge group vanished');
+      return {
+        ...base, isEdge: true, count: g.rels.length,
+        between: `${idx.get(g.a).el.name} → ${idx.get(g.b).el.name}`,
+        items: g.rels.map((r) => ({ from: r.owner, to: r.rel.to, text: relLabel(r.rel), pick: () => this.select({ t: 'rel', owner: r.owner, idx: r.idx }) })),
+      };
+    }
+
+    throw new Error(`bug: unknown selection type "${sel.t}"`);
+  }
+}
+</script>
+</body>
+</html>
