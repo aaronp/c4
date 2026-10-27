@@ -28,4 +28,6 @@ const t = L.tryParse(themed);
 assert.equal(t.ok && L.modelOf(t.doc).theme, 'dark', 'the model can name a theme');
 assert.equal(L.serialize(t.doc), themed, 'the theme round-trips');
 assert.equal(L.tryParse('# Model: Shop\n- theme: nope\n').ok, false, 'an unknown theme is an error');
+assert.equal(L.serialize(L.setTheme(t.doc, 'warm')), themed.replace('dark', 'warm'), 'picking a theme rewrites the line');
+assert.match(L.serialize(L.setTheme(doc.doc, 'warm')), /^# Model: .*\n- theme: warm$/m, 'and adds it under the title when missing');
 console.log('ok');

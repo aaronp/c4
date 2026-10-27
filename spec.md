@@ -34,7 +34,7 @@ C4 stops at components, so `#####` is an error.
 
 An optional `- theme:` bullet directly under `# Model:` (before the first element) picks the theme:
 `light`, `dark`, `blueprint` or `warm`. It is used when the link has no `?theme=`, and wins over the
-theme last picked in the browser.
+theme last picked in the browser. Picking a theme in the viewer writes this line.
 
 ### Bullets under an element
 

@@ -68,7 +68,8 @@ a.menu-item{text-decoration:none}
 .ta{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;margin:0;border:0;outline:none;resize:none;background:transparent;padding:12px 12px 12px 56px;font:inherit;color:var(--text);white-space:pre;overflow:auto;caret-color:var(--accent);tab-size:2}
 .body{flex:1;min-height:0;display:flex}
 .stage{position:relative;flex:999 1 420px;min-width:0;min-height:360px;display:flex}
-.vp{position:relative;flex:1;overflow:auto;background:var(--bg);outline:none}
+.vp{position:relative;flex:1;overflow:auto;background:var(--bg);outline:none;cursor:grab;touch-action:none}
+.vp:active{cursor:grabbing}
 .vp:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .sizer{position:relative}
 .host{position:absolute;left:0;top:0;transform-origin:0 0}
@@ -876,6 +877,10 @@ class Component extends DCLogic {
       if (title.trim() === '') throw new Error('bug: empty model title');
       return mutate(doc, (m) => { m.title = title; }).doc;
     }
+    function setTheme(doc, theme) {
+      if (!THEME_IDS.includes(theme)) throw new Error(`bug: unknown theme "${theme}"`);
+      return mutate(doc, (m) => { m.theme = theme; }).doc;
+    }
     function createModel(doc) {
       if (modelOf(doc) !== null) throw new Error('bug: model already exists');
       const c = clone(doc);
@@ -1154,7 +1159,7 @@ class Component extends DCLogic {
       slugReason, joinPath, parentOf, depthOf, isWithin, ancestorsOf, rebase,
       modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
       parse, tryParse, serialize,
-      THEME_IDS, moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, createModel,
+      THEME_IDS, moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, setTheme, createModel,
       arrange, edges, hitTest, locate, selLines,
       SAMPLE,
     });
@@ -1238,9 +1243,15 @@ class Component extends DCLogic {
     return s.theme ?? (model === null ? null : model.theme) ?? s.storedTheme ?? Component.DEFAULTS.theme;
   }
 
+  // Written into the markdown (undoable) when there is a model to hold it; the link's ?theme= is dropped
+  // so the file's choice shows. Without a parsable model it only applies to this view.
   pickTheme(id) {
-    this.setState({ theme: id, storedTheme: id });
     try { window.localStorage.setItem(Component.THEME_KEY, id); } catch (err) { /* theme still applies; it just is not remembered */ }
+    const c = this.current();
+    const model = c.ok ? Component.lib.modelOf(c.doc) : null;
+    if (model === null) { this.setState({ theme: id, storedTheme: id }); return; }
+    if (model.theme === id) { this.setState({ theme: null, storedTheme: id }); return; }
+    this.commit(Component.lib.setTheme(c.doc, id), { theme: null, storedTheme: id });
   }
 
   state = {
@@ -1357,10 +1368,17 @@ class Component extends DCLogic {
     window.addEventListener('popstate', this._onPop);
     this._onDocDown = (e) => this.closeMenus(e.target);
     document.addEventListener('pointerdown', this._onDocDown);
+    // Trackpad pinch arrives as ctrl+wheel. React's wheel handlers are passive, so this one is native.
+    this._onWheel = (e) => {
+      if (!e.ctrlKey || e.target.closest('.vp') === null) return;
+      e.preventDefault();
+      this.setZoom(this.state.zoom * Math.exp(-Math.max(-50, Math.min(50, e.deltaY)) / 100), e.clientX, e.clientY);
+    };
+    document.addEventListener('wheel', this._onWheel, { passive: false });
     if (this.state.srcUrl !== null) this.loadSrc(this.state.srcUrl); else this.loadStored();
   }
 
-  componentWillUnmount() { window.removeEventListener('popstate', this._onPop); document.removeEventListener('pointerdown', this._onDocDown); }
+  componentWillUnmount() { window.removeEventListener('popstate', this._onPop); document.removeEventListener('pointerdown', this._onDocDown); document.removeEventListener('wheel', this._onWheel); }
 
   // Markdown from ?src= is never autosaved, so it cannot overwrite the copy kept in this browser.
   loadStored() {
@@ -1407,6 +1425,13 @@ class Component extends DCLogic {
       window.history[step ? 'pushState' : 'replaceState'](null, '', q + window.location.hash);
     }
     if (s.openDlg && !prevState.openDlg) document.querySelector('dialog.modal')?.showModal();
+    if (this._anchor !== undefined && prevState.zoom !== s.zoom) {
+      const a = this._anchor;
+      this._anchor = undefined;
+      const vp = this.query('.vp');
+      vp.scrollLeft = a.x * s.zoom - a.ox;
+      vp.scrollTop = a.y * s.zoom - a.oy;
+    }
     if (s.titleDraft !== null && prevState.titleDraft === null) this.query('.title-inp').select();
     if (this._scrollSel === true) {
       this._scrollSel = false;
@@ -1706,7 +1731,19 @@ class Component extends DCLogic {
   onExpandAll = () => this.setState({ expanded: this.allParents() });
   onCollapseAll = () => this.setState({ expanded: [], sel: null, drafts: {} });
 
-  setZoom(z) { this.setState({ zoom: Math.round(Math.min(2, Math.max(0.3, z)) * 100) / 100 }); }
+  // With a client point (cursor, pinch centre), the canvas point under it stays put; see componentDidUpdate.
+  setZoom(z, cx, cy) {
+    const zoom = Math.round(Math.min(2, Math.max(0.3, z)) * 1000) / 1000;
+    if (zoom === this.state.zoom) return;
+    if (cx !== undefined) {
+      const vp = this.query('.vp');
+      const r = vp.getBoundingClientRect();
+      const ox = cx - r.left;
+      const oy = cy - r.top;
+      this._anchor = { x: (vp.scrollLeft + ox) / this.state.zoom, y: (vp.scrollTop + oy) / this.state.zoom, ox, oy };
+    }
+    this.setState({ zoom });
+  }
   onZoomIn = () => this.setZoom(this.state.zoom + 0.1);
   onZoomOut = () => this.setZoom(this.state.zoom - 0.1);
   onZoomReset = () => this.setZoom(1);
@@ -1755,11 +1792,58 @@ class Component extends DCLogic {
     this.setState({ sel: { t: 'el', path }, drafts: {}, link: { from: path, x: p.x, y: p.y } });
   }
 
-  onVpDown = () => { this.focusVp(); if (this.state.sel !== null) this.setState({ sel: null, drafts: {} }); };
+  // Pointers down on the canvas itself (boxes and handles stop theirs in Edit mode): one pans, two pinch-zoom.
+  // A pan only starts after a few px, so a click on a line or label still selects it.
+  _ptrs = new Map();
+
+  onVpDown = (e) => {
+    this.focusVp();
+    if (this.state.sel !== null) this.setState({ sel: null, drafts: {} });
+    if (e.pointerType !== 'touch') this._ptrs.clear();
+    this._ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    this._pan = null;
+    this._pinch = null;
+    if (this._ptrs.size === 1) {
+      const vp = this.query('.vp');
+      this._pan = { id: e.pointerId, x: e.clientX, y: e.clientY, sl: vp.scrollLeft, st: vp.scrollTop, on: false };
+    } else if (this._ptrs.size === 2) {
+      const [a, b] = [...this._ptrs.values()];
+      this._pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: this.state.zoom };
+      this._ptrs.forEach((v, id) => this.query('.vp').setPointerCapture(id));
+    }
+  };
+
+  // true when the move was a pan or pinch
+  panMove(e) {
+    if (!this._ptrs.has(e.pointerId)) return false;
+    this._ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this._pinch !== null && this._ptrs.size === 2) {
+      const [a, b] = [...this._ptrs.values()];
+      this.setZoom(this._pinch.z * Math.hypot(a.x - b.x, a.y - b.y) / this._pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2);
+      return true;
+    }
+    const p = this._pan;
+    if (p === null || p.id !== e.pointerId) return false;
+    const dx = e.clientX - p.x;
+    const dy = e.clientY - p.y;
+    if (!p.on && Math.hypot(dx, dy) < 4) return true;
+    if (!p.on) { p.on = true; this.capture(e); }
+    const vp = this.query('.vp');
+    vp.scrollLeft = p.sl - dx;
+    vp.scrollTop = p.st - dy;
+    return true;
+  }
+
+  panEnd(e) {
+    this._ptrs.delete(e.pointerId);
+    this._pan = null;
+    if (this._ptrs.size < 2) this._pinch = null;
+  }
 
   onVpMove = (e) => {
     const L = Component.lib;
     const s = this.state;
+    if (s.drag === null && s.link === null && this.panMove(e)) return;
     if (s.drag !== null) {
       const p = this.pt(e);
       const pos = { x: Math.max(0, L.snap(s.drag.orig.x + p.x - s.drag.start.x)), y: Math.max(s.drag.minY, L.snap(s.drag.orig.y + p.y - s.drag.start.y)) };
@@ -1780,6 +1864,7 @@ class Component extends DCLogic {
   onVpUp = (e) => {
     const L = Component.lib;
     const s = this.state;
+    this.panEnd(e);
     if (s.link !== null) {
       const ed = this.editable();
       if (ed === null) { this.setState({ link: null }); return; }
@@ -1795,7 +1880,7 @@ class Component extends DCLogic {
     if (s.drag !== null) this.setState({ drag: null });
   };
 
-  onVpCancel = () => { this.setState({ drag: null, link: null }); };
+  onVpCancel = (e) => { this.panEnd(e); this.setState({ drag: null, link: null }); };
 
   addTarget(model) {
     const L = Component.lib;
