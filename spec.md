@@ -45,6 +45,7 @@ Every `- ` bullet directly under an element heading must be one of these:
 | `- slug: <id>` | **Required.** Lower-case letters, digits and single hyphens (`order-service`). Unique among siblings. |
 | `- desc: <text>` | What it does; shown on the box. Inline markdown: `**bold**`, `*italic*`, `` `code` ``, `[link](https://…)`. |
 | `- tech: <text>` | Its technology, shown as `[Container: Java]`. |
+| `- tags: <tag>, <tag>` | Free-form labels, comma-separated (`pci, team-payments`). Used by the diagram's tag filter and search. |
 | `- <verb> → <path>[: <label>] [<tech>]` | A relationship (`->` also accepted; `→` is written back). |
 
 Each field may appear once per element. Other non-bullet lines under an element are kept as its notes.

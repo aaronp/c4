@@ -65,7 +65,17 @@ for (const want of [{ x: 96, y: 1200 }, { x: 1500, y: 96 }, { x: 1400, y: 900 }]
 // Inside an expanded sibling's growth no stored position fits; the nearest edge wins.
 assert.deepEqual(L.unpush(g0, 'bank', { x: 704, y: 900 }), { x: 639, y: 572 }, 'a drop in the push gap takes the nearest edge');
 const sm = L.modelOf(doc.doc);
-assert.deepEqual(L.search(sm, 'GATEWAY'), ['trading.orders.gateway'], 'search is case-insensitive and finds nested elements');
-assert.deepEqual(L.search(sm, '  '), [], 'a blank search matches nothing');
-assert.ok(L.search(sm, 'order gate').every((p) => L.search(sm, 'gate').includes(p)), 'every word must match');
+assert.deepEqual(L.search(sm, 'GATEWAY', []), ['trading.orders.gateway'], 'search is case-insensitive and finds nested elements');
+assert.deepEqual(L.search(sm, '  ', []), [], 'a blank search matches nothing');
+assert.ok(L.search(sm, 'order gate', []).every((p) => L.search(sm, 'gate', []).includes(p)), 'every word must match');
+const tagged = L.setTags(L.setTags(doc.doc, 'trading.orders', ['pci', 'team-a']), 'trading.engine', ['team-a']);
+const tmd = L.serialize(tagged);
+assert.match(tmd, /- tags: pci, team-a\n/, 'tags are one comma-separated line');
+const tm = L.modelOf(L.tryParse(tmd).doc);
+assert.equal(L.serialize(L.tryParse(tmd).doc), tmd, 'tags round-trip');
+assert.deepEqual(L.allTags(tm), ['pci', 'team-a'], 'known tags are unique and sorted');
+assert.deepEqual(L.search(tm, '', ['team-a']), ['trading.orders', 'trading.engine'], 'a tag filter alone matches');
+assert.deepEqual(L.search(tm, '', ['team-a', 'pci']), ['trading.orders'], 'every filter tag must match');
+assert.deepEqual(L.search(tm, 'pci', []), ['trading.orders'], 'text search sees tags');
+assert.equal(L.tryParse('# Model: M\n\n## System: S\n- slug: s\n- tags: ,\n').ok, false, 'empty tags are an error');
 console.log('ok');

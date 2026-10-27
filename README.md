@@ -8,6 +8,7 @@ their relationships and the layout. Edit the markdown or the diagram; each updat
 
 - **Source / Split / Chart** views; **Edit** (drag, connect, inspector) or **Present** mode.
 - Expand a system or container to drill in; relationships roll up to whatever is visible.
+- Search and tag filter: matches are highlighted (dashed when hidden inside a collapsed box); pick one to expand to it.
 - Button bar: **Open** (drop a file, choose one, or a URL), **Download**, **Save**
   (writes straight to a file in Chromium browsers, Ctrl/⌘+S; elsewhere it downloads).
   The source pane has its own **Copy to clipboard** button.

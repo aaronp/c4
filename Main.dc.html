@@ -48,6 +48,11 @@ a.menu-item{text-decoration:none}
 .hits .menu-item{width:100%;white-space:normal;line-height:18px;padding:6px 10px}
 .hits .trail{color:var(--muted)}
 .hits .none{padding:8px 10px}
+.filter-list{min-width:240px;max-width:320px;padding:10px;gap:10px}
+.filter-n{min-width:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--surface);font-size:11px;line-height:18px;text-align:center;box-sizing:border-box}
+.pill{cursor:default;padding-right:4px}
+.pill button{font:inherit;width:22px;height:22px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;line-height:1}
+.pill button:hover{background:var(--line)}
 .menu-item svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .menu-item kbd{margin-left:auto;padding-left:16px;font:inherit;font-size:11px;color:var(--muted)}
 .grow{flex:1}
@@ -300,6 +305,14 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 </ul>
 </sc-if>
 </div>
+<details class="menu">
+<summary class="btn" aria-label="Filter by tag" title="Filter by tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"></path></svg><sc-if value="{{filterOn}}" hint-placeholder-val="{{ false }}"><span class="filter-n">{{filterCount}}</span></sc-if></summary>
+<div class="menu-list filter-list" aria-label="Filter by tag">
+<sc-if value="{{noTags}}" hint-placeholder-val="{{ false }}"><p class="muted">No tags yet. Add them to elements in the inspector, or with a <code>- tags: a, b</code> line.</p></sc-if>
+<div class="chips"><sc-for list="{{tagChips}}" as="t" hint-placeholder-count="4"><button class="{{t.cls}}" aria-pressed="{{t.on}}" onClick="{{t.toggle}}">{{t.label}}</button></sc-for></div>
+<sc-if value="{{filterOn}}" hint-placeholder-val="{{ false }}"><div><button class="btn" onClick="{{onFilterClear}}">Clear filter</button></div></sc-if>
+</div>
+</details>
 <sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
 <div class="sep"></div>
 <span class="add-l">{{addLabel}}</span>
@@ -406,6 +419,11 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <sc-if value="{{insp.showTech}}" hint-placeholder-val="{{ true }}">
 <div class="fld"><label for="f-tech">Technology</label><input id="f-tech" class="{{insp.tech.cls}}" value="{{insp.tech.value}}" onChange="{{insp.tech.onChange}}" onBlur="{{insp.tech.onBlur}}" disabled="{{noEdit}}" placeholder="e.g. Node.js"></div>
 </sc-if>
+<div class="fld"><label for="f-tags">Tags</label>
+<input id="f-tags" class="inp" list="tag-opts" value="{{insp.tagDraft}}" onChange="{{insp.tagChange}}" onKeyDown="{{insp.tagKey}}" disabled="{{noEdit}}" placeholder="Add a tag, then Enter" autocomplete="off">
+<datalist id="tag-opts"><sc-for list="{{insp.tagOpts}}" as="o" hint-placeholder-count="3"><option value="{{o.v}}"></option></sc-for></datalist>
+<sc-if value="{{insp.hasTags}}" hint-placeholder-val="{{ false }}"><div class="chips"><sc-for list="{{insp.tags}}" as="t" hint-placeholder-count="2"><span class="chip pill">{{t.label}}<button onClick="{{t.del}}" disabled="{{noEdit}}" aria-label="Remove tag {{t.label}}">×</button></span></sc-for></div></sc-if>
+</div>
 <sc-if value="{{insp.hasKids}}" hint-placeholder-val="{{ false }}">
 <div class="fld"><span class="lbl">Contains ({{insp.kidCount}})</span>
 <div class="chips"><sc-for list="{{insp.kids}}" as="k" hint-placeholder-count="3"><button class="chip" onClick="{{k.pick}}">{{k.label}}</button></sc-for></div>
@@ -481,6 +499,7 @@ class Component extends DCLogic {
    *                           *italic*, `code`, [link](https://…)). A multi-line description is
    *                           "- desc:" followed directly by a ```md fence holding the markdown.
    *       - tech: <text>      its technology, shown as [Container: tech]
+   *       - tags: <a>, <b>    free-form labels for search and the tag filter
    *       - <verb> → <path>[: <label>] [<tech>]
    *                           a relationship to any element that is not its own ancestor or
    *                           descendant ("->" also accepted, "→" is written back). It is
@@ -588,15 +607,17 @@ class Component extends DCLogic {
       walk(model.children, null);
       return out;
     }
-    // Free-text search: paths whose name, slug, tech or description contain every word, in model order.
-    function search(model, q) {
+    // Search: paths whose name, slug, tech, tags or description contain every word and that carry
+    // every tag in `tags`, in model order. Nothing matches when both are empty.
+    function search(model, q, tags) {
       const words = q.toLowerCase().split(/\s+/).filter((w) => w !== '');
-      if (words.length === 0) return [];
+      if (words.length === 0 && tags.length === 0) return [];
       return [...index(model).entries()].filter(([, { el }]) => {
-        const hay = [el.name, el.slug, el.tech ?? '', el.desc ?? ''].join(' ').toLowerCase();
-        return words.every((w) => hay.includes(w));
+        const hay = [el.name, el.slug, el.tech ?? '', el.desc ?? '', ...el.tags].join(' ').toLowerCase();
+        return words.every((w) => hay.includes(w)) && tags.every((t) => el.tags.includes(t));
       }).map(([p]) => p);
     }
+    const allTags = (model) => [...new Set([...index(model).values()].flatMap((v) => v.el.tags))].sort();
     function findEl(model, path) {
       let list = model.children;
       let el = null;
@@ -723,7 +744,7 @@ class Component extends DCLogic {
             if (kh === null || !allowed.includes(kh[1])) fail(ln, `"${hm[1]}" headings are ${allowed.join(', ')}, written "${hm[1]} ${allowed[0]}: Name"`);
             const name = kh[2].trim();
             if (name === '') fail(ln, 'the element name is empty');
-            const node = { kind: kh[1], name, slug: null, desc: null, tech: null, rels: [], notes: [], children: [], line: ln, endLine: ln, slugLine: null };
+            const node = { kind: kh[1], name, slug: null, desc: null, tech: null, tags: [], rels: [], notes: [], children: [], line: ln, endLine: ln, slugLine: null };
             if (depth === 1) model.children.push(node);
             else {
               const parent = stack[depth - 2];
@@ -745,12 +766,19 @@ class Component extends DCLogic {
           }
           if (el !== null && /^[-*+]\s/.test(t)) {
             touch(ln);
+            const tg = /^-\s+tags\s*:\s*(.*)$/.exec(t);
+            if (tg !== null) {
+              if (el.tags.length > 0) fail(ln, `"tags" is set twice for "${el.name}"`);
+              el.tags = [...new Set(tg[1].split(',').map((x) => x.trim()).filter((x) => x !== ''))];
+              if (el.tags.length === 0) fail(ln, '"tags" is empty; delete the line instead');
+              return;
+            }
             const f = /^-\s+(slug|desc|tech)\s*:\s*(.*)$/.exec(t);
             if (f !== null && f[1] === 'desc' && f[2].trim() === '') { descOf = el; return; }
             if (f !== null) { setField(el, f[1], f[2].trim(), ln); return; }
             const r = /^-\s+(.+?)\s*(?:→|->)\s*(.+)$/.exec(t);
             if (r !== null) { el.rels.push(parseRel(r[1].trim(), r[2].trim(), ln)); return; }
-            fail(ln, 'bullets under an element are "- slug|desc|tech: value" or "- verb → path.to.target: label [tech]"');
+            fail(ln, 'bullets under an element are "- slug|desc|tech|tags: value" or "- verb → path.to.target: label [tech]"');
           }
           bucket().push(raw);
           touch(ln);
@@ -806,6 +834,7 @@ class Component extends DCLogic {
               b.push('- desc:', `${ticks}md`, ...el.desc.split('\n'), ticks);
             } else if (el.desc !== null) b.push(`- desc: ${el.desc}`);
             if (el.tech !== null) b.push(`- tech: ${el.tech}`);
+            if (el.tags.length > 0) b.push(`- tags: ${el.tags.join(', ')}`);
             el.rels.forEach((r) => b.push(relText(r)));
             push(b);
             push(trimBlank(el.notes));
@@ -903,7 +932,7 @@ class Component extends DCLogic {
         if (!allowed.includes(kind)) throw new Error(`bug: cannot add a ${kind} here`);
         const name = uniqueIn(`New ${kind}`, new Set(list.map((x) => x.name)), ' ');
         const slug = uniqueIn(slugify(name, kind), new Set(list.map((x) => x.slug)), '-');
-        list.push({ kind, name, slug, desc: null, tech: null, rels: [], notes: [], children: [], line: 0, endLine: 0, slugLine: 0 });
+        list.push({ kind, name, slug, desc: null, tech: null, tags: [], rels: [], notes: [], children: [], line: 0, endLine: 0, slugLine: 0 });
         const path = joinPath(parentPath, slug);
         ensureLayout(c).entries.push({ path, x: at.x, y: at.y, line: 0 });
         return path;
@@ -965,6 +994,10 @@ class Component extends DCLogic {
         list.forEach(({ owner, idx }) => getRel(m, owner, idx));
         [...list].sort((a, b) => b.idx - a.idx).forEach(({ owner, idx }) => { findEl(m, owner).rels.splice(idx, 1); });
       }).doc;
+    }
+    function setTags(doc, path, tags) {
+      if (tags.some((t) => t.trim() !== t || t === '' || /[,\n]/.test(t))) throw new Error('bug: tags are trimmed, non-empty and have no commas');
+      return mutate(doc, (m) => { findEl(m, path).tags = [...new Set(tags)]; }).doc;
     }
     function setTitle(doc, title) {
       if (title.trim() === '') throw new Error('bug: empty model title');
@@ -1278,7 +1311,7 @@ class Component extends DCLogic {
       slugReason, joinPath, parentOf, depthOf, isWithin, ancestorsOf, rebase,
       modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
       parse, tryParse, serialize,
-      THEME_IDS, moveTo, setProp, setSlug, setPropAndSlug, mdToHtml, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, setTheme, createModel,
+      THEME_IDS, moveTo, setProp, setSlug, setPropAndSlug, mdToHtml, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTags, allTags, setTitle, setTheme, createModel,
       arrange, unpush, edges, hitTest, locate, selLines, search,
       SAMPLE,
     });
@@ -1392,6 +1425,7 @@ class Component extends DCLogic {
     link: null,
     scrollTop: 0,
     q: '',
+    tagFilter: [],
     drafts: {},
     note: null,
     save: 'pending',
@@ -1875,6 +1909,11 @@ class Component extends DCLogic {
   onExpandAll = () => this.setState({ expanded: this.allParents() });
   onCollapseAll = () => this.setState({ expanded: [], sel: null, drafts: {} });
   onSearch = (e) => this.setState({ q: e.target.value });
+  onFilterClear = () => this.setState({ tagFilter: [] });
+  toggleTag(t) {
+    const f = this.state.tagFilter;
+    this.setState({ tagFilter: f.includes(t) ? f.filter((x) => x !== t) : [...f, t] });
+  }
   onSearchKey = (e) => {
     if (e.key === 'Escape') this.setState({ q: '' });
     if (e.key === 'Enter' && this._hits.length > 0) this.reveal(this._hits[0]);
@@ -2161,7 +2200,10 @@ class Component extends DCLogic {
     const sel = this.selExists(doc, s.sel) ? s.sel : null;
 
     const selPath = sel !== null && sel.t === 'el' ? sel.path : null;
-    const hitPaths = model === null ? [] : L.search(model, s.q);
+    const knownTags = model === null ? [] : L.allTags(model);
+    const tagFilter = s.tagFilter.filter((t) => knownTags.includes(t));
+    const tagChips = knownTags.map((t) => ({ label: t, on: tagFilter.includes(t), cls: tagFilter.includes(t) ? 'chip on' : 'chip', toggle: () => this.toggleTag(t) }));
+    const hitPaths = model === null ? [] : L.search(model, s.q, tagFilter);
     const hitSet = new Set(hitPaths);
     this._hits = hitPaths;
     const hits = hitPaths.map((path) => {
@@ -2288,7 +2330,8 @@ class Component extends DCLogic {
       noOpenUrl: s.openUrl.trim() === '' || s.openBusy, openUrlLabel: s.openBusy ? 'Opening…' : 'Open',
       hasOpenErr: s.openErr !== null, openErr: s.openErr === null ? '' : s.openErr,
       onExpandAll: this.onExpandAll, onCollapseAll: this.onCollapseAll,
-      q: s.q, onSearch: this.onSearch, onSearchKey: this.onSearchKey, hasQ: s.q.trim() !== '', hits, noHits: hits.length === 0,
+      q: s.q, onSearch: this.onSearch, onSearchKey: this.onSearchKey, hasQ: s.q.trim() !== '' || tagFilter.length > 0, hits,
+      tagChips, noTags: knownTags.length === 0, filterOn: tagFilter.length > 0, filterCount: tagFilter.length, onFilterClear: this.onFilterClear, noHits: hits.length === 0,
       addLabel: addParent === null ? 'Add:' : `Add to ${idx.get(addParent).el.name}:`,
       palette, noEdit, noModel: model === null, noAdd: noEdit || model === null,
       onZoomIn: this.onZoomIn, onZoomOut: this.onZoomOut, onZoomReset: this.onZoomReset, onFit: this.onFit,
@@ -2344,6 +2387,8 @@ class Component extends DCLogic {
         pick: () => this.select({ t: 'rel', owner: path, idx: i }),
         del: () => { const ed = this.editable(); if (ed !== null) this.commit(L.removeRel(ed.doc, path, i), {}); },
       }));
+      const tagDraft = this.state.drafts['el:tags']?.value ?? '';
+      const setTags = (tags, extra) => { const ed = this.editable(); if (ed !== null) this.commit(L.setTags(ed.doc, path, tags), extra); };
       const ins = [];
       idx.forEach(({ el: x }, p) => x.rels.forEach((r, i) => { if (r.to === path) ins.push({ other: p, text: relLabel(r), pick: () => this.select({ t: 'rel', owner: p, idx: i }) }); }));
       return {
@@ -2389,6 +2434,18 @@ class Component extends DCLogic {
         showTech: !L.isPerson(el),
         tech: this.field('el:tech', el.tech === null ? '' : el.tech, () => null,
           (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'tech', textOrNull(v)), {})),
+        tagDraft,
+        tagOpts: L.allTags(model).filter((t) => !el.tags.includes(t)).map((v) => ({ v })),
+        tagChange: (ev) => this.setState({ drafts: { ...this.state.drafts, 'el:tags': { value: ev.target.value.replace(/,/g, ''), err: null } } }),
+        tagKey: (ev) => {
+          if (ev.key !== 'Enter') return;
+          ev.preventDefault();
+          const t = tagDraft.trim();
+          if (t === '') return;
+          setTags([...el.tags, t], { drafts: { ...this.state.drafts, 'el:tags': { value: '', err: null } } });
+        },
+        tags: el.tags.map((t) => ({ label: t, del: () => setTags(el.tags.filter((x) => x !== t), {}) })),
+        hasTags: el.tags.length > 0,
         hasKids: el.children.length > 0, kidCount: el.children.length,
         kids: el.children.map((k) => ({ label: k.name, pick: () => this.select({ t: 'el', path: L.joinPath(path, k.slug) }) })),
         toggleLabel: expanded.has(path) ? 'Collapse on diagram' : 'Expand on diagram',
