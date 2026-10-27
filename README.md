@@ -46,7 +46,7 @@ Add any of these to choose what shows (unknown values are ignored):
 | --- | --- |
 | `view` | `chart` (default), `split`, `source` |
 | `mode` | `edit` (default), `present` |
-| `theme` | `light` (default), `dark`, `blueprint`, `warm`; wins over the theme saved in the browser |
+| `theme` | `light` (default), `dark`, `blueprint`, `warm`; wins over the markdown's `- theme:` and the theme saved in the browser |
 | `sel` | An element path, e.g. `trading.orders.gateway`: selects it and expands what contains it |
 | `open` | Comma-separated paths to expand, e.g. `broker,trading` |
 | `zoom` | `0.3` to `2` (default `1`) |

@@ -21,14 +21,29 @@
 body{margin:0;background:var(--bg);color-scheme:var(--scheme)}
 a{color:var(--link)}a:hover{color:var(--link-hover)}
 .app{font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--text);display:flex;flex-direction:column;height:100vh;min-height:640px;background:var(--bg);box-sizing:border-box}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);min-height:52px;box-sizing:border-box}
-.main{flex:1;min-height:0;display:flex;flex-wrap:wrap}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);min-height:52px;box-sizing:border-box}
+.main{flex:1;min-height:0;display:flex}
 .pane-md{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;background:var(--surface-2);border-right:1px solid var(--line)}
 .pane-dia{flex:999 1 640px;min-width:0;display:flex;flex-direction:column}
 .bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);min-height:52px;box-sizing:border-box}
 .bar-title{font-weight:600;font-size:14px;margin-right:auto;display:flex;align-items:center;gap:8px}
 .bar-title span{font-weight:400;color:var(--muted);font-size:12px}
-.model-title{font-weight:600;font-size:15px;margin-right:8px}
+.model-title{font-weight:600;font-size:15px}
+.inp.title-inp{width:auto;field-sizing:content;min-width:12ch;max-width:min(40ch,60vw);font-weight:600;font-size:15px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--subtle);color:var(--text)}
+.rename{opacity:0;margin-left:-8px}
+.model-title:hover+.rename,.rename:hover,.rename:focus-visible{opacity:1}
+.menu{position:relative}
+.menu>summary{list-style:none}
+.menu>summary::-webkit-details-marker{display:none}
+.menu-list{position:absolute;left:0;top:calc(100% + 4px);z-index:20;min-width:220px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.16);display:flex;flex-direction:column}
+.menu-item{font:inherit;font-size:13px;min-height:36px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;white-space:nowrap}
+a.menu-item{text-decoration:none}
+.menu-sep{height:1px;margin:4px 6px;background:var(--line)}
+.menu-item:hover,.menu-item:focus-visible{background:var(--subtle);outline:none}
+.menu-item svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.menu-item kbd{margin-left:auto;padding-left:16px;font:inherit;font-size:11px;color:var(--muted)}
 .grow{flex:1}
 .sep{width:1px;height:24px;background:var(--line);margin:0 4px}
 .add-l{font-size:12px;color:var(--muted);font-weight:500}
@@ -51,7 +66,7 @@ a{color:var(--link)}a:hover{color:var(--link-hover)}
 .ln.err{background:var(--err-bg)}
 .ln.err .ln-n{color:var(--err);font-weight:500}
 .ta{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;margin:0;border:0;outline:none;resize:none;background:transparent;padding:12px 12px 12px 56px;font:inherit;color:var(--text);white-space:pre;overflow:auto;caret-color:var(--accent);tab-size:2}
-.body{flex:1;min-height:0;display:flex;flex-wrap:wrap}
+.body{flex:1;min-height:0;display:flex}
 .stage{position:relative;flex:999 1 420px;min-width:0;min-height:360px;display:flex}
 .vp{position:relative;flex:1;overflow:auto;background:var(--bg);outline:none}
 .vp:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
@@ -174,25 +189,39 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .drop>svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .row{display:flex;gap:8px}
 .alert{padding:10px 14px;background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-text);border-radius:8px;font-size:13px;line-height:18px}
-@media (pointer:coarse){.btn,.inp{min-height:44px}.seg button{min-height:40px}.chip{min-height:40px}.handle{width:30px;height:30px;right:-15px;margin-top:-15px;opacity:1}}
-@media (max-width:860px){.app{height:auto}.main.split{flex-wrap:wrap}.splitter{display:none}.pane-md{flex-basis:100% !important;height:50vh;border-right:0;border-bottom:1px solid var(--line)}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid var(--line)}}
+@media (pointer:coarse){.rename{opacity:1}.btn,.inp{min-height:44px}.seg button{min-height:40px}.chip{min-height:40px}.handle{width:30px;height:30px;right:-15px;margin-top:-15px;opacity:1}}
+@media (max-width:860px){.app{height:auto}.main,.main.split,.body{flex-wrap:wrap}.splitter{display:none}.pane-md{flex-basis:100% !important;height:50vh;border-right:0;border-bottom:1px solid var(--line)}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid var(--line)}}
 </style>
 </helmet>
 <div class="{{appCls}}" onKeyDown="{{onKeyDown}}">
 
 <div class="topbar">
+<sc-if value="{{titleEditing}}" hint-placeholder-val="{{ false }}">
+<input class="inp title-inp" aria-label="Chart name" value="{{titleDraft}}" onChange="{{onTitleChange}}" onKeyDown="{{onTitleKey}}" onBlur="{{onTitleCommit}}">
+</sc-if>
+<sc-if value="{{titleShown}}" hint-placeholder-val="{{ true }}">
+<span class="model-title">{{modelTitle}}</span>
+<sc-if value="{{canRename}}" hint-placeholder-val="{{ true }}"><button class="btn icon ghost rename" onClick="{{onTitleEdit}}" aria-label="Rename chart" title="Rename chart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13 7l4 4"></path></svg></button></sc-if>
+</sc-if>
+<details class="menu">
+<summary class="btn">File<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></summary>
+<div class="menu-list" role="menu" onClick="{{onMenuPick}}">
+<button class="menu-item" role="menuitem" onClick="{{onNew}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M12 12v6M9 15h6"></path></svg>New</button>
+<button class="menu-item" role="menuitem" onClick="{{onOpenShow}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Open…</button>
+<button class="menu-item" role="menuitem" onClick="{{onSave}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M7 3v5h8V3"></path><rect x="7" y="13" width="10" height="8"></rect></svg>Save<kbd>Ctrl/⌘+S</kbd></button>
+<button class="menu-item" role="menuitem" onClick="{{onDownload}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>Download {{fileName}}</button>
+<div class="menu-sep" role="separator"></div>
+<a class="menu-item" role="menuitem" href="https://github.com/aaronp/c4" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg>Repo</a>
+</div>
+</details>
+<div class="sep"></div>
 <button class="btn icon" onClick="{{onUndo}}" disabled="{{noUndo}}" aria-label="Undo" title="Undo (Ctrl/⌘+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
 <button class="btn icon" onClick="{{onRedo}}" disabled="{{noRedo}}" aria-label="Redo" title="Redo (Ctrl/⌘+Shift+Z)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
-<div class="sep"></div>
-<button class="btn icon" onClick="{{onOpenShow}}" aria-label="Open" title="Open a file or URL"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></button>
-<button class="btn icon" onClick="{{onDownload}}" aria-label="Download markdown" title="Download {{fileName}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg></button>
-<button class="btn icon" onClick="{{onSave}}" aria-label="Save" title="Save to a file (Ctrl/⌘+S)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M7 3v5h8V3"></path><rect x="7" y="13" width="10" height="8"></rect></svg></button>
 <div class="sep"></div>
 <div class="seg" role="group" aria-label="View"><button class="{{viewSourceCls}}" onClick="{{onViewSource}}">Source</button><button class="{{viewSplitCls}}" onClick="{{onViewSplit}}">Split</button><button class="{{viewChartCls}}" onClick="{{onViewChart}}">Chart</button></div>
 <sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
 <div class="seg" role="group" aria-label="Mode"><button class="{{presentCls}}" onClick="{{onPresent}}">Present</button><button class="{{editCls}}" onClick="{{onEdit}}">Edit</button></div>
 </sc-if>
-<span class="model-title">{{modelTitle}}</span>
 <div class="grow"></div>
 <div class="theme-picker" role="group" aria-label="Theme"><span class="theme-label">Theme</span><sc-for list="{{themes}}" as="t" hint-placeholder-count="4"><button class="{{t.cls}}" aria-pressed="{{t.on}}" aria-label="{{t.label}} theme" title="{{t.label}}" onClick="{{t.pick}}"><span class="theme-swatch" aria-hidden="true" style="background: {{t.bg}}"><span style="background: {{t.primary}}"></span><i style="background: {{t.accent}}"></i></span><sc-if value="{{t.on}}" hint-placeholder-val="{{ false }}"><span>{{t.label}}</span></sc-if></button></sc-for></div>
 </div>
@@ -409,6 +438,8 @@ class Component extends DCLogic {
    *   The document is a list of "# " sections, kept in their order:
    *
    *   # Model: <Title>      exactly one. The C4 model, nested by heading depth:
+   *     - theme: <id>         optional, before the first element: light | dark | blueprint | warm.
+   *                           Used when the address bar has no ?theme=.
    *     ## <Kind>: <Name>     Person | External Person | System | External
    *     ### <Kind>: <Name>    Container | Database | Queue      (inside a System or External)
    *     #### <Kind>: <Name>   Component                         (inside a Container)
@@ -451,6 +482,7 @@ class Component extends DCLogic {
     const KIND_CLASS = Object.freeze({ 'Person': 'k-person', 'External Person': 'k-xperson', 'System': 'k-system', 'External': 'k-external', 'Container': 'k-container', 'Database': 'k-database', 'Queue': 'k-queue', 'Component': 'k-component' });
     const KIND_TYPE = Object.freeze({ 'Person': 'Person', 'External Person': 'Person, external', 'System': 'Software System', 'External': 'Software System, external', 'Container': 'Container', 'Database': 'Database', 'Queue': 'Queue', 'Component': 'Component' });
     const PERSONS = new Set(['Person', 'External Person']);
+    const THEME_IDS = Object.freeze(['light', 'dark', 'blueprint', 'warm']);
     const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     const PATH_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
     const NODE_W = 224;
@@ -590,7 +622,7 @@ class Component extends DCLogic {
           if (mm !== null) {
             if (model !== null) fail(ln, 'only one "# Model:" section is allowed');
             if (mm[1].trim() === '') fail(ln, 'the model title is empty');
-            model = { type: 'model', title: mm[1].trim(), notes: [], children: [], line: ln };
+            model = { type: 'model', title: mm[1].trim(), theme: null, notes: [], children: [], line: ln };
             sec = model;
             sections.push(sec);
             return;
@@ -627,6 +659,13 @@ class Component extends DCLogic {
             stack = stack.slice(0, depth - 1);
             stack.push(node);
             el = node;
+            return;
+          }
+          const th = el === null ? /^-\s+theme\s*:\s*(.*)$/.exec(t) : null;
+          if (th !== null) {
+            if (model.theme !== null) fail(ln, '"theme" is set twice');
+            if (!THEME_IDS.includes(th[1].trim())) fail(ln, `the theme is one of ${THEME_IDS.join(', ')}`);
+            model.theme = th[1].trim();
             return;
           }
           if (el !== null && /^[-*+]\s/.test(t)) {
@@ -679,7 +718,7 @@ class Component extends DCLogic {
           return;
         }
         if (sec.type === 'model') {
-          push([`# Model: ${sec.title}`]);
+          push([`# Model: ${sec.title}`, ...(sec.theme === null ? [] : [`- theme: ${sec.theme}`])]);
           push(trimBlank(sec.notes));
           const emit = (list, depth) => list.forEach((el) => {
             const b = [`${'#'.repeat(depth + 1)} ${el.kind}: ${el.name}`, `- slug: ${el.slug}`];
@@ -840,7 +879,7 @@ class Component extends DCLogic {
     function createModel(doc) {
       if (modelOf(doc) !== null) throw new Error('bug: model already exists');
       const c = clone(doc);
-      c.sections.push({ type: 'model', title: 'Untitled model', notes: [], children: [], line: 0 });
+      c.sections.push({ type: 'model', title: 'Untitled model', theme: null, notes: [], children: [], line: 0 });
       return c;
     }
 
@@ -1115,7 +1154,7 @@ class Component extends DCLogic {
       slugReason, joinPath, parentOf, depthOf, isWithin, ancestorsOf, rebase,
       modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
       parse, tryParse, serialize,
-      moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, createModel,
+      THEME_IDS, moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, createModel,
       arrange, edges, hitTest, locate, selLines,
       SAMPLE,
     });
@@ -1125,7 +1164,7 @@ class Component extends DCLogic {
   static THEME_KEY = 'c4-markdown-viewer:theme';
   static SPLIT_KEY = 'c4-markdown-viewer:split';
   static MD_W = 380;
-  // Ids map to :root[data-theme] blocks in the styles; swatch colours are for the picker only.
+  // Ids (lib.THEME_IDS) map to :root[data-theme] blocks in the styles; swatch colours are for the picker only.
   static THEMES = Object.freeze([
     { id: 'light', label: 'Light', bg: '#EEF0F3', primary: '#1B1F27', accent: '#1168BD' },
     { id: 'dark', label: 'Dark', bg: '#0F1216', primary: '#E6E9EE', accent: '#4C9AEA' },
@@ -1168,7 +1207,7 @@ class Component extends DCLogic {
     if (s.srcUrl !== null) q.set('src', s.srcUrl);
     if (s.view !== D.view) q.set('view', s.view);
     if (s.mode !== D.mode) q.set('mode', s.mode);
-    if (s.theme !== D.theme) q.set('theme', s.theme);
+    if (s.theme !== null) q.set('theme', s.theme);
     if (s.sel !== null && s.sel.t === 'el') q.set('sel', s.sel.path);
     if (s.expanded.length > 0) q.set('open', s.expanded.join(','));
     if (s.zoom !== D.zoom) q.set('zoom', String(s.zoom));
@@ -1182,12 +1221,26 @@ class Component extends DCLogic {
     return w >= 200 ? w : Component.MD_W;
   }
 
+  // `theme` is the address bar's (or the picker's) choice, null if none; see themeOf() for the fallbacks.
   static initial() {
     const p = Component.fromQuery(window.location.search);
-    let theme = p.theme;
-    if (theme === null) { try { theme = window.localStorage.getItem(Component.THEME_KEY); } catch (err) { theme = null; } }
-    if (!Component.THEMES.some((t) => t.id === theme)) theme = Component.DEFAULTS.theme;
-    return { view: p.view, mode: p.mode, theme, zoom: p.zoom, sel: p.sel, expanded: p.expanded, srcUrl: p.src };
+    let storedTheme = null;
+    try { storedTheme = window.localStorage.getItem(Component.THEME_KEY); } catch (err) { storedTheme = null; }
+    if (!Component.THEMES.some((t) => t.id === storedTheme)) storedTheme = null;
+    return { view: p.view, mode: p.mode, theme: p.theme, storedTheme, zoom: p.zoom, sel: p.sel, expanded: p.expanded, srcUrl: p.src };
+  }
+
+  // ?theme= wins, then the markdown's "- theme:", then the last theme picked in this browser.
+  themeOf() {
+    const s = this.state;
+    const doc = this.current().doc;
+    const model = doc === null ? null : Component.lib.modelOf(doc);
+    return s.theme ?? (model === null ? null : model.theme) ?? s.storedTheme ?? Component.DEFAULTS.theme;
+  }
+
+  pickTheme(id) {
+    this.setState({ theme: id, storedTheme: id });
+    try { window.localStorage.setItem(Component.THEME_KEY, id); } catch (err) { /* theme still applies; it just is not remembered */ }
   }
 
   state = {
@@ -1201,6 +1254,7 @@ class Component extends DCLogic {
     openUrl: '',
     openBusy: false,
     openErr: null,
+    titleDraft: null,
     dragging: false,
     drag: null,
     link: null,
@@ -1248,6 +1302,7 @@ class Component extends DCLogic {
   onKeyDown = (e) => {
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
+    if (e.key === 'Escape') this.closeMenus(null);
     if (mod && k === 's') { e.preventDefault(); this.onSave(); return; }
     if (e.target.closest('dialog') !== null) return;
     if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) this.onRedo(); else this.onUndo(); return; }
@@ -1297,13 +1352,15 @@ class Component extends DCLogic {
 
   componentDidMount() {
     this._prev = this.state;
-    document.documentElement.dataset.theme = this.state.theme;
+    document.documentElement.dataset.theme = this.themeOf();
     this._onPop = () => this.applyQuery();
     window.addEventListener('popstate', this._onPop);
+    this._onDocDown = (e) => this.closeMenus(e.target);
+    document.addEventListener('pointerdown', this._onDocDown);
     if (this.state.srcUrl !== null) this.loadSrc(this.state.srcUrl); else this.loadStored();
   }
 
-  componentWillUnmount() { window.removeEventListener('popstate', this._onPop); }
+  componentWillUnmount() { window.removeEventListener('popstate', this._onPop); document.removeEventListener('pointerdown', this._onDocDown); }
 
   // Markdown from ?src= is never autosaved, so it cannot overwrite the copy kept in this browser.
   loadStored() {
@@ -1342,10 +1399,7 @@ class Component extends DCLogic {
     const prevState = this._prev;
     this._prev = s;
     if (prevState.md !== s.md && s.save !== 'unavailable' && s.srcUrl === null) this.persist(s.md);
-    if (prevState.theme !== s.theme) {
-      document.documentElement.dataset.theme = s.theme;
-      try { window.localStorage.setItem(Component.THEME_KEY, s.theme); } catch (err) { /* theme still applies; it just is not remembered */ }
-    }
+    document.documentElement.dataset.theme = this.themeOf();
     const q = Component.toQuery(s, window.location.search);
     if (q !== window.location.search) {
       // A new view, mode, selection or file is a history step; zoom and expand/collapse just update the link.
@@ -1353,6 +1407,7 @@ class Component extends DCLogic {
       window.history[step ? 'pushState' : 'replaceState'](null, '', q + window.location.hash);
     }
     if (s.openDlg && !prevState.openDlg) document.querySelector('dialog.modal')?.showModal();
+    if (s.titleDraft !== null && prevState.titleDraft === null) this.query('.title-inp').select();
     if (this._scrollSel === true) {
       this._scrollSel = false;
       if (s.view !== 'chart') this.scrollMarkdownToSelection();
@@ -1537,6 +1592,28 @@ class Component extends DCLogic {
   onImport = (e) => { this.openFile(e.target.files[0]); e.target.value = ''; };
 
   onReset = () => this.loadMd(Component.lib.SAMPLE, 'architecture.md', null, 'Sample loaded');
+
+  // Undoable, like opening a file.
+  onNew = () => { this.loadMd('# Model: Untitled model\n', 'architecture.md', null, 'New model'); this.setState({ mode: 'edit' }); };
+
+  // ---------- file menu (a native <details>, closed by hand after a pick or an outside click) ----------
+  closeMenus(except) { document.querySelectorAll('details.menu[open]').forEach((d) => { if (!d.contains(except)) d.open = false; }); }
+  onMenuPick = () => this.closeMenus(null);
+
+  // ---------- chart name ----------
+  onTitleEdit = () => this.setState({ titleDraft: Component.lib.modelOf(this.current().doc).title });
+  onTitleChange = (e) => this.setState({ titleDraft: e.target.value });
+  onTitleKey = (e) => {
+    if (e.key === 'Enter') e.target.blur();
+    if (e.key === 'Escape') this.setState({ titleDraft: null });
+  };
+  onTitleCommit = () => {
+    if (this.state.titleDraft === null) return;
+    const v = this.state.titleDraft.trim();
+    const c = this.current();
+    if (v === '' || !c.ok || v === Component.lib.modelOf(c.doc).title) { this.setState({ titleDraft: null }); return; }
+    this.commit(Component.lib.setTitle(c.doc, v), { titleDraft: null });
+  };
 
   // ---------- open dialog ----------
   onOpenShow = () => this.setState({ openDlg: true, openErr: null, dragging: false });
@@ -1748,6 +1825,7 @@ class Component extends DCLogic {
     this._scrollSel = true;
     const expanded = parentPath === null ? this.state.expanded : this.withAncestors([...this.state.expanded, parentPath], parentPath);
     this.commit(r.doc, { sel: { t: 'el', path: r.path }, drafts: {}, expanded, note: { text: parentPath === null ? `Added ${kind}` : `Added ${kind} inside ${parentPath}`, tone: 'ok' } });
+    this.focusName();
   }
 
   focusName() {
@@ -1793,6 +1871,7 @@ class Component extends DCLogic {
     const doc = c.doc;
     const model = doc === null ? null : L.modelOf(doc);
     const noEdit = !c.ok;
+    const theme = this.themeOf();
     const idx = model === null ? new Map() : L.index(model);
     const expanded = new Set(s.expanded.filter((p) => idx.has(p)));
     const geo = model === null ? null : L.arrange(model, L.layoutOf(doc), expanded, s.drag === null ? null : s.drag.frozen);
@@ -1905,11 +1984,15 @@ class Component extends DCLogic {
       onViewSource: this.onViewSource, onViewSplit: this.onViewSplit, onViewChart: this.onViewChart,
       onPresent: this.onPresent, onEdit: this.onEdit,
       modelTitle: model === null ? '' : model.title,
+      titleEditing: s.titleDraft !== null, titleShown: s.titleDraft === null, titleDraft: s.titleDraft ?? '',
+      canRename: model !== null && c.ok,
+      onTitleEdit: this.onTitleEdit, onTitleChange: this.onTitleChange, onTitleKey: this.onTitleKey, onTitleCommit: this.onTitleCommit,
+      onNew: this.onNew, onMenuPick: this.onMenuPick,
       md: s.md, lines, scrollTop: s.scrollTop,
       onMdChange: this.onMdChange, onCaret: this.onCaret, onTaScroll: this.onTaScroll,
       onCopy: this.onCopy, copyLabel: s.copyLabel, onImport: this.onImport, onReset: this.onReset, onDownload: this.onDownload, onSave: this.onSave,
       fileName: s.fileName,
-      themes: Component.THEMES.map((t) => ({ ...t, on: t.id === s.theme, cls: t.id === s.theme ? 'theme-btn on' : 'theme-btn', pick: () => this.setState({ theme: t.id }) })),
+      themes: Component.THEMES.map((t) => ({ ...t, on: t.id === theme, cls: t.id === theme ? 'theme-btn on' : 'theme-btn', pick: () => this.pickTheme(t.id) })),
       isSplit: s.view === 'split', mainCls: s.view === 'split' ? 'main split' : 'main', mdW: s.mdW,
       onSplitDown: this.onSplitDown, onSplitMove: this.onSplitMove, onSplitUp: this.onSplitUp, onSplitReset: this.onSplitReset, onSplitKey: this.onSplitKey,
       openDlg: s.openDlg, onOpenShow: this.onOpenShow, onOpenHide: this.onOpenHide, onOpenCancel: this.onOpenCancel, onOpenBackdrop: this.onOpenBackdrop,

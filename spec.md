@@ -25,6 +25,17 @@ Elements nest by heading depth:
 
 C4 stops at components, so `#####` is an error.
 
+### Theme
+
+```markdown
+# Model: Shop
+- theme: dark
+```
+
+An optional `- theme:` bullet directly under `# Model:` (before the first element) picks the theme:
+`light`, `dark`, `blueprint` or `warm`. It is used when the link has no `?theme=`, and wins over the
+theme last picked in the browser.
+
 ### Bullets under an element
 
 Every `- ` bullet directly under an element heading must be one of these:
