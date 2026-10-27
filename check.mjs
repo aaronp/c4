@@ -64,4 +64,8 @@ for (const want of [{ x: 96, y: 1200 }, { x: 1500, y: 96 }, { x: 1400, y: 900 }]
 }
 // Inside an expanded sibling's growth no stored position fits; the nearest edge wins.
 assert.deepEqual(L.unpush(g0, 'bank', { x: 704, y: 900 }), { x: 639, y: 572 }, 'a drop in the push gap takes the nearest edge');
+const sm = L.modelOf(doc.doc);
+assert.deepEqual(L.search(sm, 'GATEWAY'), ['trading.orders.gateway'], 'search is case-insensitive and finds nested elements');
+assert.deepEqual(L.search(sm, '  '), [], 'a blank search matches nothing');
+assert.ok(L.search(sm, 'order gate').every((p) => L.search(sm, 'gate').includes(p)), 'every word must match');
 console.log('ok');

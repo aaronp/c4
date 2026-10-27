@@ -42,6 +42,12 @@ a{color:var(--link)}a:hover{color:var(--link-hover)}
 a.menu-item{text-decoration:none}
 .menu-sep{height:1px;margin:4px 6px;background:var(--line)}
 .menu-item:hover,.menu-item:focus-visible{background:var(--subtle);outline:none}
+.search{position:relative;width:220px}
+.hits{display:none;position:absolute;left:0;top:calc(100% + 4px);z-index:20;width:max(100%,340px);max-height:260px;overflow:auto;margin:0;padding:4px;list-style:none;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.16)}
+.search:focus-within .hits{display:block}
+.hits .menu-item{width:100%;white-space:normal;line-height:18px;padding:6px 10px}
+.hits .trail{color:var(--muted)}
+.hits .none{padding:8px 10px}
 .menu-item svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .menu-item kbd{margin-left:auto;padding-left:16px;font:inherit;font-size:11px;color:var(--muted)}
 .grow{flex:1}
@@ -81,6 +87,8 @@ a.menu-item{text-decoration:none}
 .node{position:absolute;box-sizing:border-box;border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;color:#FFFFFF;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 1px 2px rgba(16,24,40,.2),0 2px 8px rgba(16,24,40,.08)}
 .app.present .node{cursor:pointer}
 .node.kids{padding-bottom:30px}
+.node.hit{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--accent)}
+.node.hit-in{outline:2px dashed var(--accent);outline-offset:4px}
 .node.sel{outline:3px solid var(--sel);outline-offset:3px}
 .node.dim{opacity:.45}
 .node .nm{font-weight:600;font-size:15px;line-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -110,6 +118,7 @@ a.menu-item{text-decoration:none}
 .app.present .bound-label{cursor:pointer}
 .bound-label:hover{background:var(--label-hover)}
 .bound-label.sel{background:var(--sel-bg)}
+.bound-label.hit b{box-shadow:inset 0 -3px 0 var(--accent)}
 .bound-label span{color:var(--muted);font-size:11px}
 .collapse{font:inherit;font-size:11px;line-height:14px;padding:3px 8px;border-radius:10px;border:1px solid var(--ctl-line);background:var(--surface);color:var(--text-2);cursor:pointer}
 .collapse:hover{background:var(--subtle)}
@@ -280,6 +289,17 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <div class="bar">
 <button class="btn" onClick="{{onExpandAll}}" disabled="{{noModel}}">Expand all</button>
 <button class="btn" onClick="{{onCollapseAll}}" disabled="{{noModel}}">Collapse all</button>
+<div class="search" role="search">
+<input class="inp" type="search" placeholder="Search…" aria-label="Search the diagram" value="{{q}}" onChange="{{onSearch}}" onKeyDown="{{onSearchKey}}" disabled="{{noModel}}">
+<sc-if value="{{hasQ}}" hint-placeholder-val="{{ false }}">
+<ul class="hits" aria-label="Matches" onMouseDown="{{keepFocus}}">
+<sc-for list="{{hits}}" as="h" hint-placeholder-count="3">
+<li><button class="menu-item" onClick="{{h.pick}}"><span class="{{h.sw}}"></span><span><span class="trail">{{h.trail}}</span>{{h.name}}</span></button></li>
+</sc-for>
+<sc-if value="{{noHits}}" hint-placeholder-val="{{ false }}"><li class="muted none">No matches</li></sc-if>
+</ul>
+</sc-if>
+</div>
 <sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
 <div class="sep"></div>
 <span class="add-l">{{addLabel}}</span>
@@ -567,6 +587,15 @@ class Component extends DCLogic {
       });
       walk(model.children, null);
       return out;
+    }
+    // Free-text search: paths whose name, slug, tech or description contain every word, in model order.
+    function search(model, q) {
+      const words = q.toLowerCase().split(/\s+/).filter((w) => w !== '');
+      if (words.length === 0) return [];
+      return [...index(model).entries()].filter(([, { el }]) => {
+        const hay = [el.name, el.slug, el.tech ?? '', el.desc ?? ''].join(' ').toLowerCase();
+        return words.every((w) => hay.includes(w));
+      }).map(([p]) => p);
     }
     function findEl(model, path) {
       let list = model.children;
@@ -1250,7 +1279,7 @@ class Component extends DCLogic {
       modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
       parse, tryParse, serialize,
       THEME_IDS, moveTo, setProp, setSlug, setPropAndSlug, mdToHtml, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, setTheme, createModel,
-      arrange, unpush, edges, hitTest, locate, selLines,
+      arrange, unpush, edges, hitTest, locate, selLines, search,
       SAMPLE,
     });
   })();
@@ -1362,6 +1391,7 @@ class Component extends DCLogic {
     drag: null,
     link: null,
     scrollTop: 0,
+    q: '',
     drafts: {},
     note: null,
     save: 'pending',
@@ -1537,6 +1567,15 @@ class Component extends DCLogic {
       this._focusName = false;
       const n = document.querySelector('#f-name');
       if (n !== null) { n.focus(); n.select(); }
+    }
+    if (this._reveal !== undefined) {
+      const r = this._geo?.rects.get(this._reveal);
+      this._reveal = undefined;
+      const vp = this.query('.vp');
+      if (r !== undefined) {
+        vp.scrollLeft = (r.x + r.w / 2) * s.zoom - vp.clientWidth / 2;
+        vp.scrollTop = (r.y + r.h / 2) * s.zoom - vp.clientHeight / 2;
+      }
     }
     if (this._scrollSel === true) {
       this._scrollSel = false;
@@ -1835,6 +1874,17 @@ class Component extends DCLogic {
   }
   onExpandAll = () => this.setState({ expanded: this.allParents() });
   onCollapseAll = () => this.setState({ expanded: [], sel: null, drafts: {} });
+  onSearch = (e) => this.setState({ q: e.target.value });
+  onSearchKey = (e) => {
+    if (e.key === 'Escape') this.setState({ q: '' });
+    if (e.key === 'Enter' && this._hits.length > 0) this.reveal(this._hits[0]);
+  };
+  // Select a search hit, expanding what contains it, and scroll it into the middle of the canvas.
+  reveal(path) {
+    this._reveal = path;
+    this.select({ t: 'el', path });
+    this.focusVp();
+  }
 
   // With a client point (cursor, pinch centre), the canvas point under it stays put; see componentDidUpdate.
   setZoom(z, cx, cy) {
@@ -2111,6 +2161,13 @@ class Component extends DCLogic {
     const sel = this.selExists(doc, s.sel) ? s.sel : null;
 
     const selPath = sel !== null && sel.t === 'el' ? sel.path : null;
+    const hitPaths = model === null ? [] : L.search(model, s.q);
+    const hitSet = new Set(hitPaths);
+    this._hits = hitPaths;
+    const hits = hitPaths.map((path) => {
+      const el = idx.get(path).el;
+      return { name: el.name, trail: L.ancestorsOf(path).map((a) => `${idx.get(a).el.name} › `).join(''), sw: `sw ${L.kindClass(el.kind)}`, pick: () => this.reveal(path) };
+    });
     const touches = (g) => selPath !== null && g.rels.some((r) => L.isWithin(r.owner, selPath) || L.isWithin(r.rel.to, selPath));
     const groupSelected = (g) => sel !== null && ((sel.t === 'edge' && sel.key === g.key) || (sel.t === 'rel' && g.rels.some((r) => r.owner === sel.owner && r.idx === sel.idx)));
 
@@ -2135,7 +2192,7 @@ class Component extends DCLogic {
       const dim = selPath !== null && !L.isWithin(path, selPath) && !L.isWithin(selPath, path) && !groups.some((g) => touches(g) && (g.a === path || g.b === path));
       return {
         name: el.name, x: r.x, y: r.y, w: r.w, h: r.h, auto: r.auto,
-        cls: `node ${L.kindClass(el.kind)}${kids > 0 ? ' kids' : ''}${selPath === path ? ' sel' : ''}${dim && !isEdit ? ' dim' : ''}`,
+        cls: `node ${L.kindClass(el.kind)}${kids > 0 ? ' kids' : ''}${selPath === path ? ' sel' : ''}${dim && !isEdit ? ' dim' : ''}${hitSet.has(path) ? ' hit' : hitPaths.some((h) => L.isWithin(h, path)) ? ' hit-in' : ''}`,
         isPerson: L.isPerson(el), typeLine: L.typeLine(el),
         desc: el.desc === null ? '' : el.desc, hasDesc: el.desc !== null,
         hasKids: kids > 0, kidsLabel: kids > 0 ? `${kids} ${kids === 1 ? noun[0] : noun[1]}` : '',
@@ -2152,7 +2209,7 @@ class Component extends DCLogic {
       const on = selPath === path;
       return {
         name: el.name, x: r.x, y: r.y, w: r.w, h: r.h, lx: r.x + 12, ly: r.y + r.h - 44,
-        cls: `bound${L.depthOf(path) > 1 ? ' d2' : ''}${on ? ' sel' : ''}`, lcls: on ? 'bound-label sel' : 'bound-label',
+        cls: `bound${L.depthOf(path) > 1 ? ' d2' : ''}${on ? ' sel' : ''}`, lcls: `bound-label${on ? ' sel' : ''}${hitSet.has(path) ? ' hit' : ''}`,
         typeLine: L.typeLine(el),
         down: (ev) => this.startDrag(ev, path),
         click: () => { if (s.mode === 'present') this.select({ t: 'el', path }); },
@@ -2231,6 +2288,7 @@ class Component extends DCLogic {
       noOpenUrl: s.openUrl.trim() === '' || s.openBusy, openUrlLabel: s.openBusy ? 'Opening…' : 'Open',
       hasOpenErr: s.openErr !== null, openErr: s.openErr === null ? '' : s.openErr,
       onExpandAll: this.onExpandAll, onCollapseAll: this.onCollapseAll,
+      q: s.q, onSearch: this.onSearch, onSearchKey: this.onSearchKey, hasQ: s.q.trim() !== '', hits, noHits: hits.length === 0,
       addLabel: addParent === null ? 'Add:' : `Add to ${idx.get(addParent).el.name}:`,
       palette, noEdit, noModel: model === null, noAdd: noEdit || model === null,
       onZoomIn: this.onZoomIn, onZoomOut: this.onZoomOut, onZoomReset: this.onZoomReset, onFit: this.onFit,
