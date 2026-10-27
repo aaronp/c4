@@ -43,11 +43,27 @@ Every `- ` bullet directly under an element heading must be one of these:
 | Bullet | Meaning |
 | --- | --- |
 | `- slug: <id>` | **Required.** Lower-case letters, digits and single hyphens (`order-service`). Unique among siblings. |
-| `- desc: <text>` | What it does; shown on the box. |
+| `- desc: <text>` | What it does; shown on the box. Inline markdown: `**bold**`, `*italic*`, `` `code` ``, `[link](https://…)`. |
 | `- tech: <text>` | Its technology, shown as `[Container: Java]`. |
 | `- <verb> → <path>[: <label>] [<tech>]` | A relationship (`->` also accepted; `→` is written back). |
 
 Each field may appear once per element. Other non-bullet lines under an element are kept as its notes.
+
+A description that spans lines is `- desc:` followed directly by a `md` fence. It may hold paragraphs
+and `- ` lists. The fence is made longer than any backtick fence inside it:
+
+````markdown
+### Container: Order Service
+- slug: orders
+- desc:
+```md
+Accepts and validates **orders**.
+
+- rejects stale quotes
+- routes to the [matching engine](https://example.com/engine)
+```
+- tech: Java
+````
 
 ### Paths
 

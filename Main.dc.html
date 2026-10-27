@@ -131,7 +131,12 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .card{position:absolute;left:16px;bottom:16px;z-index:6;width:320px;max-width:calc(100% - 32px);box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:0 4px 16px rgba(16,24,40,.12);display:flex;flex-direction:column;gap:6px}
 .card-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
 .card .ty{font-size:12px;color:var(--muted)}
-.card p{margin:0;font-size:13px;line-height:19px;color:var(--text)}
+.card p,.card .md{margin:0;font-size:13px;line-height:19px;color:var(--text)}
+.md p,.md ul{margin:0}.md ul{padding-left:16px}.md p+p,.md p+ul,.md ul+p{margin-top:4px}
+.md code{font-family:'IBM Plex Mono',monospace;font-size:.92em;background:var(--subtle);border-radius:3px;padding:0 3px}
+.md a{color:var(--accent)}
+.inp.area{padding:8px 10px;min-height:88px;line-height:20px;resize:vertical}
+.fmt{display:flex;gap:4px}.fmt-b{min-height:28px;width:30px;font-size:13px}
 .insp{flex:1 1 300px;max-width:100%;border-left:1px solid var(--line);background:var(--surface);overflow:auto;padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;min-height:0}
 .insp-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
 .fld{display:flex;flex-direction:column;gap:6px}
@@ -319,7 +324,7 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <sc-if value="{{n.auto}}" hint-placeholder-val="{{ false }}"><div class="auto">auto</div></sc-if>
 <div class="nm">{{n.name}}</div>
 <div class="ty">{{n.typeLine}}</div>
-<sc-if value="{{n.hasDesc}}" hint-placeholder-val="{{ true }}"><div class="ds">{{n.desc}}</div></sc-if>
+<sc-if value="{{n.hasDesc}}" hint-placeholder-val="{{ true }}"><div class="ds md" data-md="{{n.desc}}"></div></sc-if>
 <sc-if value="{{n.hasKids}}" hint-placeholder-val="{{ false }}"><button class="xp" onPointerDown="{{stop}}" onClick="{{n.expand}}" aria-label="Expand {{n.name}}">+ {{n.kidsLabel}}</button></sc-if>
 <button class="handle" aria-label="Drag to connect {{n.name}} to another element" onPointerDown="{{n.linkDown}}"></button>
 </div>
@@ -341,7 +346,7 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <div class="card" role="region" aria-label="Selected element">
 <div class="card-h"><span class="{{card.sw}}"></span>{{card.name}}</div>
 <div class="ty">{{card.typeLine}}</div>
-<sc-if value="{{card.hasDesc}}" hint-placeholder-val="{{ true }}"><p>{{card.desc}}</p></sc-if>
+<sc-if value="{{card.hasDesc}}" hint-placeholder-val="{{ true }}"><div class="md" data-md="{{card.desc}}"></div></sc-if>
 <p class="muted">{{card.rels}}</p>
 <sc-if value="{{card.hasKids}}" hint-placeholder-val="{{ false }}"><div><button class="btn" onClick="{{card.toggle}}">{{card.toggleLabel}}</button></div></sc-if>
 </div>
@@ -375,7 +380,9 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <div class="fld"><label for="f-name">Name</label><input id="f-name" class="{{insp.name.cls}}" value="{{insp.name.value}}" onChange="{{insp.name.onChange}}" onBlur="{{insp.name.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.name.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.name.err}}</div></sc-if></div>
 <div class="fld"><label for="f-slug">Slug</label><input id="f-slug" class="{{insp.slug.cls}}" value="{{insp.slug.value}}" onChange="{{insp.slug.onChange}}" onBlur="{{insp.slug.onBlur}}" disabled="{{noEdit}}"><sc-if value="{{insp.slug.hasErr}}" hint-placeholder-val="{{ false }}"><div class="ferr">{{insp.slug.err}}</div></sc-if></div>
 <div class="fld"><span class="lbl">Kind</span><div class="chips"><sc-for list="{{insp.kinds}}" as="k" hint-placeholder-count="4"><button class="{{k.cls}}" onClick="{{k.pick}}" disabled="{{k.off}}"><span class="{{k.sw}}"></span>{{k.label}}</button></sc-for></div></div>
-<div class="fld"><label for="f-desc">Description</label><input id="f-desc" class="{{insp.desc.cls}}" value="{{insp.desc.value}}" onChange="{{insp.desc.onChange}}" onBlur="{{insp.desc.onBlur}}" disabled="{{noEdit}}" placeholder="What it does"></div>
+<div class="fld"><label for="f-desc">Description</label>
+<div class="fmt" role="toolbar" aria-label="Description formatting"><sc-for list="{{insp.fmt}}" as="f" hint-placeholder-count="5"><button class="btn icon fmt-b" title="{{f.title}}" aria-label="{{f.title}}" onMouseDown="{{keepFocus}}" onClick="{{f.apply}}" disabled="{{noEdit}}">{{f.label}}</button></sc-for></div>
+<textarea id="f-desc" class="{{insp.desc.cls}} area" rows="4" value="{{insp.desc.value}}" onChange="{{insp.desc.onChange}}" onBlur="{{insp.desc.onBlur}}" onKeyDown="{{insp.descKey}}" disabled="{{noEdit}}" placeholder="What it does (markdown)"></textarea></div>
 <sc-if value="{{insp.showTech}}" hint-placeholder-val="{{ true }}">
 <div class="fld"><label for="f-tech">Technology</label><input id="f-tech" class="{{insp.tech.cls}}" value="{{insp.tech.value}}" onChange="{{insp.tech.onChange}}" onBlur="{{insp.tech.onBlur}}" disabled="{{noEdit}}" placeholder="e.g. Node.js"></div>
 </sc-if>
@@ -450,7 +457,9 @@ class Component extends DCLogic {
    *                           Unique among siblings; the element's path is its slugs joined
    *                           with dots (trading.orders.gateway). Paths are how relationships
    *                           and the layout refer to elements, so renaming never breaks them.
-   *       - desc: <text>      what it does; shown on the box
+   *       - desc: <text>      what it does; shown on the box. Inline markdown (**bold**,
+   *                           *italic*, `code`, [link](https://…)). A multi-line description is
+   *                           "- desc:" followed directly by a ```md fence holding the markdown.
    *       - tech: <text>      its technology, shown as [Container: tech]
    *       - <verb> → <path>[: <label>] [<tech>]
    *                           a relationship to any element that is not its own ancestor or
@@ -482,6 +491,7 @@ class Component extends DCLogic {
     const CHILD_NOUN = Object.freeze({ 1: ['container', 'containers'], 2: ['component', 'components'] });
     const KIND_CLASS = Object.freeze({ 'Person': 'k-person', 'External Person': 'k-xperson', 'System': 'k-system', 'External': 'k-external', 'Container': 'k-container', 'Database': 'k-database', 'Queue': 'k-queue', 'Component': 'k-component' });
     const KIND_TYPE = Object.freeze({ 'Person': 'Person', 'External Person': 'Person, external', 'System': 'Software System', 'External': 'Software System, external', 'Container': 'Container', 'Database': 'Database', 'Queue': 'Queue', 'Component': 'Component' });
+    const KIND_SUFFIX = Object.freeze({ 'Person': 'p', 'External Person': 'ep', 'System': 'sys', 'External': 'ext', 'Container': 'ctr', 'Database': 'db', 'Queue': 'q', 'Component': 'cmp' });
     const PERSONS = new Set(['Person', 'External Person']);
     const THEME_IDS = Object.freeze(['light', 'dark', 'blueprint', 'warm']);
     const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -515,9 +525,29 @@ class Component extends DCLogic {
     const ancestorsOf = (path) => { const s = path.split('.'); return s.slice(0, -1).map((_, i) => s.slice(0, i + 1).join('.')); };
     const relText = (r) => `- ${r.verb} → ${r.to}${r.label !== null ? `: ${r.label}` : ''}${r.tech !== null ? ` [${r.tech}]` : ''}`;
     const slugReason = (s) => (SLUG_RE.test(s) ? null : 'Slugs are lower-case letters, digits and single hyphens, e.g. order-service');
-    function slugify(name) {
-      const s = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      return s === '' ? 'item' : s;
+    function slugify(name, kind) {
+      const words = name.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w !== '');
+      // At most 4 words / 24 chars, cut on a word boundary, then a terse kind suffix.
+      let s = words.length === 0 ? 'item' : words[0].slice(0, 24);
+      for (const w of words.slice(1, 4)) { if (s.length + 1 + w.length > 24) break; s += `-${w}`; }
+      return `${s}-${lookup(KIND_SUFFIX, kind, 'kind')}`;
+    }
+    // A small, safe markdown subset for descriptions: paragraphs, "- " lists, **bold**, *italic*,
+    // `code` and [text](http(s) links). Everything is HTML-escaped first.
+    // ponytail: no headings/tables/nesting; vendor a real renderer + sanitizer if descriptions need them.
+    function mdToHtml(md) {
+      const esc = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const inline = (x) => esc(x)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\s](?:[^*]*[^*\s])?)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      return md.split(/\n\s*\n/).map((block) => {
+        const ls = block.split('\n').filter((l) => l.trim() !== '');
+        if (ls.length === 0) return '';
+        if (ls.every((l) => /^\s*[-*]\s/.test(l))) return `<ul>${ls.map((l) => `<li>${inline(l.replace(/^\s*[-*]\s+/, ''))}</li>`).join('')}</ul>`;
+        return `<p>${ls.map(inline).join('<br>')}</p>`;
+      }).join('');
     }
     function uniqueIn(base, taken, sepr) {
       if (!taken.has(base)) return base;
@@ -607,11 +637,26 @@ class Component extends DCLogic {
       let stack = [];
       let el = null;
       let fence = false;
+      let descOf = null; // element whose "- desc:" line wants a ```md fence next
+      let descFence = null; // { el, close, lines, ln } while inside that fence
       const bucket = () => (sec.type === 'prose' ? sec.lines : sec.type === 'layout' ? sec.notes : el !== null ? el.notes : sec.notes);
       const touch = (ln) => { if (el !== null) el.endLine = ln; };
       lines.forEach((raw, i) => {
         const ln = i + 1;
         const t = raw.trim();
+        if (descFence !== null) {
+          touch(ln);
+          if (descFence.close.test(t)) { setField(descFence.el, 'desc', trimBlank(descFence.lines).join('\n'), descFence.ln); descFence = null; } else descFence.lines.push(raw);
+          return;
+        }
+        if (descOf !== null) {
+          const open = /^(`{3,})md$/.exec(t);
+          if (open === null) fail(ln, '"- desc:" with no text must be followed by a ```md block');
+          descFence = { el: descOf, close: new RegExp(`^${open[1]}\`*$`), lines: [], ln };
+          descOf = null;
+          touch(ln);
+          return;
+        }
         if (/^(```|~~~)/.test(t)) { fence = !fence; bucket().push(raw); touch(ln); return; }
         if (fence) { bucket().push(raw); if (t !== '') touch(ln); return; }
         if (t === '') { bucket().push(''); return; }
@@ -672,6 +717,7 @@ class Component extends DCLogic {
           if (el !== null && /^[-*+]\s/.test(t)) {
             touch(ln);
             const f = /^-\s+(slug|desc|tech)\s*:\s*(.*)$/.exec(t);
+            if (f !== null && f[1] === 'desc' && f[2].trim() === '') { descOf = el; return; }
             if (f !== null) { setField(el, f[1], f[2].trim(), ln); return; }
             const r = /^-\s+(.+?)\s*(?:→|->)\s*(.+)$/.exec(t);
             if (r !== null) { el.rels.push(parseRel(r[1].trim(), r[2].trim(), ln)); return; }
@@ -689,7 +735,8 @@ class Component extends DCLogic {
         }
         bucket().push(raw);
       });
-      if (fence) fail(lines.length, 'a ``` code fence is never closed');
+      if (fence || descFence !== null) fail(lines.length, 'a ``` code fence is never closed');
+      if (descOf !== null) fail(lines.length, '"- desc:" with no text must be followed by a ```md block');
       validate(model, layout);
       return { sections };
     }
@@ -723,7 +770,12 @@ class Component extends DCLogic {
           push(trimBlank(sec.notes));
           const emit = (list, depth) => list.forEach((el) => {
             const b = [`${'#'.repeat(depth + 1)} ${el.kind}: ${el.name}`, `- slug: ${el.slug}`];
-            if (el.desc !== null) b.push(`- desc: ${el.desc}`);
+            if (el.desc !== null && el.desc.includes('\n')) {
+              // The fence is longer than any backtick run that starts a line inside it.
+              const runs = el.desc.split('\n').map((l) => /^\s*(`*)/.exec(l)[1].length);
+              const ticks = '`'.repeat(Math.max(3, ...runs.map((n) => n + 1)));
+              b.push('- desc:', `${ticks}md`, ...el.desc.split('\n'), ticks);
+            } else if (el.desc !== null) b.push(`- desc: ${el.desc}`);
             if (el.tech !== null) b.push(`- tech: ${el.tech}`);
             el.rels.forEach((r) => b.push(relText(r)));
             push(b);
@@ -781,11 +833,23 @@ class Component extends DCLogic {
           if (el.children.some((k) => !childKinds(value).includes(k.kind))) throw new Error(`bug: a ${value} cannot hold these children`);
         } else if (prop === 'name') {
           if (value.trim() === '' || /\n/.test(value)) throw new Error('bug: name must be one non-empty line');
-        } else if (value !== null && (value.trim() === '' || /\n/.test(value))) {
+        } else if (prop === 'desc' && value !== null && value.trim() === '') {
+          throw new Error('bug: desc must be null or non-empty');
+        } else if (prop !== 'desc' && value !== null && (value.trim() === '' || /\n/.test(value))) {
           throw new Error(`bug: ${prop} must be null or one non-empty line`);
         }
         el[prop] = value;
       }).doc;
+    }
+    // The slug follows the name and kind until someone edits the slug by hand.
+    function setPropAndSlug(doc, path, prop, value) {
+      const el = findEl(modelOf(doc), path);
+      const next = setProp(doc, path, prop, value);
+      if (el.slug !== slugify(el.name, el.kind)) return { doc: next, newPath: path };
+      const after = findEl(modelOf(next), path);
+      const taken = new Set(siblingsOf(modelOf(next), path).map((x) => x.slug).filter((x) => x !== el.slug));
+      const slug = uniqueIn(slugify(after.name, after.kind), taken, '-');
+      return slug === el.slug ? { doc: next, newPath: path } : setSlug(next, path, slug);
     }
     const rebase = (p, from, to) => (isWithin(p, from) ? to + p.slice(from.length) : p);
     function setSlug(doc, path, slug) {
@@ -809,7 +873,7 @@ class Component extends DCLogic {
         const allowed = parentPath === null ? TOP_KINDS : childKinds(findEl(m, parentPath).kind);
         if (!allowed.includes(kind)) throw new Error(`bug: cannot add a ${kind} here`);
         const name = uniqueIn(`New ${kind}`, new Set(list.map((x) => x.name)), ' ');
-        const slug = uniqueIn(slugify(name), new Set(list.map((x) => x.slug)), '-');
+        const slug = uniqueIn(slugify(name, kind), new Set(list.map((x) => x.slug)), '-');
         list.push({ kind, name, slug, desc: null, tech: null, rels: [], notes: [], children: [], line: 0, endLine: 0, slugLine: 0 });
         const path = joinPath(parentPath, slug);
         ensureLayout(c).entries.push({ path, x: at.x, y: at.y, line: 0 });
@@ -896,6 +960,7 @@ class Component extends DCLogic {
       const given = new Map((layout === null ? [] : layout.entries).map((e) => [e.path, { x: e.x, y: e.y }]));
       const stored = new Map();
       const shifts = {};
+      const pushers = new Map();
       const autoSet = new Set();
       const isOpen = (path, el) => expanded.has(path) && el.children.length > 0;
       function level(list, parentPath) {
@@ -933,6 +998,7 @@ class Component extends DCLogic {
             });
           }
           shifts[i.path] = { dx, dy };
+          pushers.set(i.path, items.filter((e) => e !== i && e.open).map((e) => ({ x: e.s.x + NODE_W, y: e.s.y + NODE_H, dw: e.w - NODE_W, dh: e.h - NODE_H })));
           i.d = { x: i.s.x + dx, y: i.s.y + dy };
         });
         return {
@@ -953,7 +1019,31 @@ class Component extends DCLogic {
       const all = [...rects.values()];
       const cw = all.length === 0 ? 0 : Math.max(...all.map((r) => r.x + r.w));
       const ch = all.length === 0 ? 0 : Math.max(...all.map((r) => r.y + r.h));
-      return { rects, order, stored, shifts, autoCount: autoSet.size, contentW: cw + 64, contentH: ch + 64, width: Math.max(1600, cw + 400), height: Math.max(1100, ch + 400) };
+      return { rects, order, stored, shifts, pushers, autoCount: autoSet.size, contentW: cw + 64, contentH: ch + 64, width: Math.max(1600, cw + 400), height: Math.max(1100, ch + 400) };
+    }
+    // Inverse of the push in arrange(): the stored position of `path` that is drawn at `want`.
+    // Each axis is a staircase (pushers add their growth once stored >= their edge); when `want`
+    // falls inside a pusher's growth there is no exact answer, so it takes the nearest.
+    function unpush(geo, path, want) {
+      const axis = (w, ps) => {
+        const sorted = [...ps].sort((a, b) => a.at - b.at);
+        let best = null;
+        let shift = 0;
+        for (let k = 0; k <= sorted.length; k += 1) {
+          const lo = k === 0 ? -Infinity : sorted[k - 1].at;
+          const hi = k === sorted.length ? Infinity : sorted[k].at;
+          if (lo < hi) {
+            const v = Math.min(Math.max(w - shift, lo), hi - 1);
+            const miss = Math.abs(v + shift - w);
+            if (best === null || miss < best.miss) best = { v, miss };
+          }
+          if (k < sorted.length) shift += sorted[k].by;
+        }
+        return best.v;
+      };
+      const ps = geo.pushers.get(path);
+      if (ps === undefined) throw new Error(`bug: "${path}" has no position`);
+      return { x: axis(want.x, ps.map((p) => ({ at: p.x, by: p.dw }))), y: axis(want.y, ps.map((p) => ({ at: p.y, by: p.dh }))) };
     }
     // The visible box that stands for `path`: its first collapsed ancestor, or itself.
     function rep(geo, path) {
@@ -1159,8 +1249,8 @@ class Component extends DCLogic {
       slugReason, joinPath, parentOf, depthOf, isWithin, ancestorsOf, rebase,
       modelOf, layoutOf, index, findEl, getRel, siblingsOf, relTargetReason,
       parse, tryParse, serialize,
-      THEME_IDS, moveTo, setProp, setSlug, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, setTheme, createModel,
-      arrange, edges, hitTest, locate, selLines,
+      THEME_IDS, moveTo, setProp, setSlug, setPropAndSlug, mdToHtml, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTitle, setTheme, createModel,
+      arrange, unpush, edges, hitTest, locate, selLines,
       SAMPLE,
     });
   })();
@@ -1178,6 +1268,8 @@ class Component extends DCLogic {
   ]);
   static VIEWS = Object.freeze(['source', 'split', 'chart']);
   static MODES = Object.freeze(['edit', 'present']);
+  // kind -> [before, after, placeholder]; 'list' is handled separately.
+  static FORMATS = Object.freeze({ bold: ['**', '**', 'bold'], italic: ['*', '*', 'italic'], code: ['`', '`', 'code'], link: ['[', '](https://)', 'link'] });
   static DEFAULTS = Object.freeze({ view: 'chart', mode: 'edit', theme: 'light', zoom: 1 });
 
   // ---------- the address bar as state (pure) ----------
@@ -1363,6 +1455,7 @@ class Component extends DCLogic {
 
   componentDidMount() {
     this._prev = this.state;
+    this.renderMarkdown();
     document.documentElement.dataset.theme = this.themeOf();
     this._onPop = () => this.applyQuery();
     window.addEventListener('popstate', this._onPop);
@@ -1433,6 +1526,18 @@ class Component extends DCLogic {
       vp.scrollTop = a.y * s.zoom - a.oy;
     }
     if (s.titleDraft !== null && prevState.titleDraft === null) this.query('.title-inp').select();
+    this.renderMarkdown();
+    if (this._descSel !== undefined) {
+      const [a, b] = this._descSel;
+      this._descSel = undefined;
+      const ta = document.querySelector('#f-desc');
+      if (ta !== null) { ta.focus(); ta.setSelectionRange(a, b); }
+    }
+    if (this._focusName === true) {
+      this._focusName = false;
+      const n = document.querySelector('#f-name');
+      if (n !== null) { n.focus(); n.select(); }
+    }
     if (this._scrollSel === true) {
       this._scrollSel = false;
       if (s.view !== 'chart') this.scrollMarkdownToSelection();
@@ -1774,10 +1879,15 @@ class Component extends DCLogic {
     const geo = this._geo;
     const s = geo.stored.get(path);
     if (s === undefined) throw new Error(`bug: "${path}" has no position`);
+    // The box follows the pointer where it is drawn (stored + push); onVpMove converts back.
+    // Siblings keep their pushes frozen; the dragged box's own push stays live.
+    const sh = geo.shifts[path];
+    const frozen = { ...geo.shifts };
+    delete frozen[path];
     this.capture(e);
     this._scrollSel = true;
     this._dragSeq = (this._dragSeq === undefined ? 0 : this._dragSeq) + 1;
-    this.setState({ sel: { t: 'el', path }, drafts: {}, drag: { id: this._dragSeq, path, start: this.pt(e), orig: { x: s.x, y: s.y }, frozen: { ...geo.shifts }, last: '', minY: L.depthOf(path) === 1 && L.isPerson(L.findEl(ed.model, path)) ? 48 : 0 } });
+    this.setState({ sel: { t: 'el', path }, drafts: {}, drag: { id: this._dragSeq, path, start: this.pt(e), orig: { x: s.x + sh.dx, y: s.y + sh.dy }, frozen, last: '', minY: L.depthOf(path) === 1 && L.isPerson(L.findEl(ed.model, path)) ? 48 : 0 } });
   }
 
   startLink(e, path) {
@@ -1846,7 +1956,8 @@ class Component extends DCLogic {
     if (s.drag === null && s.link === null && this.panMove(e)) return;
     if (s.drag !== null) {
       const p = this.pt(e);
-      const pos = { x: Math.max(0, L.snap(s.drag.orig.x + p.x - s.drag.start.x)), y: Math.max(s.drag.minY, L.snap(s.drag.orig.y + p.y - s.drag.start.y)) };
+      const u = L.unpush(this._geo, s.drag.path, { x: L.snap(s.drag.orig.x + p.x - s.drag.start.x), y: L.snap(s.drag.orig.y + p.y - s.drag.start.y) });
+      const pos = { x: Math.max(0, u.x), y: Math.max(s.drag.minY, u.y) };
       const key = `${pos.x},${pos.y}`;
       if (key === s.drag.last) return;
       const ed = this.editable();
@@ -1908,14 +2019,48 @@ class Component extends DCLogic {
     }
     const r = L.addElement(ed.doc, parentPath, kind, at);
     this._scrollSel = true;
+    this.focusName();
     const expanded = parentPath === null ? this.state.expanded : this.withAncestors([...this.state.expanded, parentPath], parentPath);
     this.commit(r.doc, { sel: { t: 'el', path: r.path }, drafts: {}, expanded, note: { text: parentPath === null ? `Added ${kind}` : `Added ${kind} inside ${parentPath}`, tone: 'ok' } });
-    this.focusName();
   }
 
-  focusName() {
-    window.setTimeout(() => { const n = document.querySelector('#f-name'); if (n === null) return; n.focus(); n.select(); }, 40);
+  keepFocus = (e) => { e.preventDefault(); };
+
+  // Wraps the Description selection in markdown (or bullets its lines) through the field's onChange,
+  // then componentDidUpdate puts the caret back.
+  formatDesc(kind, onChange) {
+    const ta = document.querySelector('#f-desc');
+    if (ta === null || ta.disabled) return;
+    const v = ta.value;
+    let a = ta.selectionStart;
+    const b = ta.selectionEnd;
+    let next;
+    if (kind === 'list') {
+      a = v.lastIndexOf('\n', a - 1) + 1;
+      const body = v.slice(a, b).split('\n').map((l) => (/^[-*]\s/.test(l) ? l : `- ${l}`)).join('\n');
+      next = v.slice(0, a) + body + v.slice(b);
+      this._descSel = [a, a + body.length];
+    } else {
+      const [pre, post, ph] = Component.FORMATS[kind];
+      const text = a === b ? ph : v.slice(a, b);
+      next = v.slice(0, a) + pre + text + post + v.slice(b);
+      const at = a + pre.length;
+      // A new link selects its URL so it can be typed over; everything else selects the wrapped text.
+      this._descSel = kind === 'link' && a !== b ? [at + text.length + 2, at + text.length + post.length - 1] : [at, at + text.length];
+    }
+    onChange({ target: { value: next } });
   }
+
+  renderMarkdown() {
+    document.querySelectorAll('[data-md]').forEach((n) => {
+      if (n.dataset.done === n.dataset.md) return;
+      n.innerHTML = Component.lib.mdToHtml(n.dataset.md);
+      n.dataset.done = n.dataset.md;
+    });
+  }
+
+  // Call before the setState that selects the element; componentDidUpdate focuses and selects its Name field.
+  focusName() { this._focusName = true; }
 
   // A text field that keeps the typed text as a draft (so spaces and invalid
   // intermediate states survive re-parsing) and commits only valid values.
@@ -1997,7 +2142,7 @@ class Component extends DCLogic {
         expand: (ev) => { ev.stopPropagation(); this.toggle(path); },
         down: (ev) => this.startDrag(ev, path),
         click: () => { if (s.mode === 'present') { if (kids > 0) this.toggle(path); else this.select({ t: 'el', path }); } },
-        dbl: () => { if (s.mode !== 'edit') return; if (kids > 0) this.toggle(path); else { this.select({ t: 'el', path }); this.focusName(); } },
+        dbl: () => { if (s.mode !== 'edit') return; if (kids > 0) this.toggle(path); else { this.focusName(); this.select({ t: 'el', path }); } },
         linkDown: (ev) => this.startLink(ev, path),
       };
     });
@@ -2093,7 +2238,7 @@ class Component extends DCLogic {
       stale: !c.ok, errLine: errLine === null ? '' : errLine, errReason: c.ok ? '' : c.res.reason,
       empty: model === null, onCreateModel: this.onCreateModel,
       onVpDown: this.onVpDown, onVpMove: this.onVpMove, onVpUp: this.onVpUp, onVpCancel: this.onVpCancel,
-      stop: this.stop,
+      stop: this.stop, keepFocus: this.keepFocus,
       W, H, sizerW: Math.ceil(W * s.zoom), sizerH: Math.ceil(H * s.zoom),
       hostCls: `host${showGrid ? ' grid' : ''}${c.ok ? '' : ' stale'}`,
       nodes, bounds, edges,
@@ -2134,6 +2279,8 @@ class Component extends DCLogic {
       const textOrNull = (v) => (v.trim() === '' ? null : v.trim());
       const depthKinds = L.KINDS_BY_DEPTH[L.depthOf(path)];
       if (depthKinds === undefined) throw new Error('bug: element deeper than components');
+      const desc = this.field('el:desc', el.desc === null ? '' : el.desc, () => null,
+        (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'desc', textOrNull(v)), {}));
       const outs = el.rels.map((r, i) => ({
         other: r.to, text: relLabel(r),
         pick: () => this.select({ t: 'rel', owner: path, idx: i }),
@@ -2146,7 +2293,10 @@ class Component extends DCLogic {
         sw: `sw ${L.kindClass(el.kind)}`, kind: el.kind,
         name: this.field('el:name', el.name,
           (v) => (v.trim() === '' ? 'Name is required' : null),
-          (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'name', v.trim()), {})),
+          (v, ed) => {
+            const r = L.setPropAndSlug(ed.doc, path, 'name', v.trim());
+            return this.docPatch(r.doc, { sel: { t: 'el', path: r.newPath }, expanded: this.state.expanded.map((p) => L.rebase(p, path, r.newPath)) });
+          }),
         slug: this.field('el:slug', el.slug,
           (v) => {
             const why = L.slugReason(v);
@@ -2161,11 +2311,23 @@ class Component extends DCLogic {
           const fits = el.children.every((x) => L.childKinds(k).includes(x.kind));
           return {
             label: k, sw: `sw ${L.kindClass(k)}`, cls: k === el.kind ? 'chip on' : 'chip', off: this.current().ok === false || !fits,
-            pick: () => { const ed = this.editable(); if (ed !== null) this.commit(L.setProp(ed.doc, path, 'kind', k), {}); },
+            pick: () => {
+              const ed = this.editable(); if (ed === null) return;
+              const r = L.setPropAndSlug(ed.doc, path, 'kind', k);
+              this.commit(r.doc, { sel: { t: 'el', path: r.newPath }, expanded: this.state.expanded.map((p) => L.rebase(p, path, r.newPath)) });
+            },
           };
         }),
-        desc: this.field('el:desc', el.desc === null ? '' : el.desc, () => null,
-          (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'desc', textOrNull(v)), {})),
+        desc,
+        fmt: [['bold', 'B', 'Bold (⌘B)'], ['italic', 'I', 'Italic (⌘I)'], ['code', '`', 'Code'], ['link', '🔗', 'Link (⌘K)'], ['list', '•', 'Bulleted list']]
+          .map(([k, label, title]) => ({ label, title, apply: () => this.formatDesc(k, desc.onChange) })),
+        descKey: (e) => {
+          if (!(e.metaKey || e.ctrlKey)) return;
+          const k = { b: 'bold', i: 'italic', k: 'link' }[e.key.toLowerCase()];
+          if (k === undefined) return;
+          e.preventDefault();
+          this.formatDesc(k, desc.onChange);
+        },
         showTech: !L.isPerson(el),
         tech: this.field('el:tech', el.tech === null ? '' : el.tech, () => null,
           (v, ed) => this.docPatch(L.setProp(ed.doc, path, 'tech', textOrNull(v)), {})),
