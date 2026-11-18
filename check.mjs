@@ -78,4 +78,25 @@ assert.deepEqual(L.search(tm, '', ['team-a']), ['trading.orders', 'trading.engin
 assert.deepEqual(L.search(tm, '', ['team-a', 'pci']), ['trading.orders'], 'every filter tag must match');
 assert.deepEqual(L.search(tm, 'pci', []), ['trading.orders'], 'text search sees tags');
 assert.equal(L.tryParse('# Model: M\n\n## System: S\n- slug: s\n- tags: ,\n').ok, false, 'empty tags are an error');
+// Card, badge and sidecar settings.
+const sc = L.card(doc.doc, {}, '2026-01-01', { label: 'a.md', src: 'a/b.md' });
+assert.deepEqual(sc.report, { people: 1, systems: 2, externals: 1, containers: 7, components: 4, relationships: 11 }, 'the card counts the sample');
+assert.equal(sc.heading.primary, '15', 'the big number defaults to all elements');
+assert.equal(sc.source.url, 'https://aaronp.github.io/c4/?src=a/b.md', 'links open the hosted viewer on ?src=');
+assert.deepEqual(sc.status, { label: 'Laid out', tone: 'good' }, 'every sample element is placed');
+const { prefs, warnings } = L.parsePrefs({ title: 'T', heading: { primary: 'containers' }, legend: [{ id: 'systems', color: '#000000' }, { id: 'nope' }], hideZero: true });
+assert.deepEqual(warnings.length, 1, 'unknown legend ids are dropped with a warning');
+const pc = L.card(doc.doc, prefs, '', { label: 'a.md', src: 'a.md' }, 'http://h/');
+assert.deepEqual([pc.title, pc.heading.primary, pc.heading.label, pc.legend], ['T', '7', 'containers', [{ id: 'systems', label: 'Systems', color: '#000000' }]], 'settings pick title, number and legend');
+assert.throws(() => L.parsePrefs({ legend: [{ id: 'systems', url: 'x' }] }), /unknown field "url"/, 'unknown fields are errors');
+assert.throws(() => L.parsePrefs({ heading: { primary: 'nope' } }), /heading\/primary/, 'and so is an unknown big number');
+assert.equal(L.sidecarOf('x/architecture.md'), 'x/architecture.card.json', 'the sidecar sits beside the markdown');
+const svg = L.badgeSvg(pc);
+assert.match(svg, /^<svg [^>]*aria-label="T: 2 systems"/, 'the badge shows non-zero items only');
+assert.equal(L.badgeSvg({ ...pc, title: '<&>' }).includes('<&>'), false, 'and escapes text');
+// A whole model in a link.
+const packed = await L.packMd(L.SAMPLE);
+assert.match(packed, /^[A-Za-z0-9_-]+$/, 'packed links are base64url');
+assert.equal(await L.unpackMd(packed), L.SAMPLE, 'and unpack to the same markdown');
+await assert.rejects(L.unpackMd(packed.slice(0, 40)), /damaged or incomplete/, 'a cut-short link is a readable error');
 console.log('ok');

@@ -1,0 +1,29 @@
+{
+  "name": "@pritzlaff/c4",
+  "version": "0.1.0",
+  "description": "C4 architecture diagrams driven by a single markdown file: a viewer/editor, a local server that saves back to the file, and a card.json / badge.svg summary.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaronp/c4.git"
+  },
+  "homepage": "https://aaronp.github.io/c4/",
+  "type": "module",
+  "bin": {
+    "c4": "bin/c4.mjs"
+  },
+  "files": [
+    "bin",
+    "Main.dc.html",
+    "support.js",
+    "vendor"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node check.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

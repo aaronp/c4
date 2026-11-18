@@ -9,8 +9,10 @@ their relationships and the layout. Edit the markdown or the diagram; each updat
 - **Source / Split / Chart** views; **Edit** (drag, connect, inspector) or **Present** mode.
 - Expand a system or container to drill in; relationships roll up to whatever is visible.
 - Search and tag filter: matches are highlighted (dashed when hidden inside a collapsed box); pick one to expand to it.
-- Button bar: **Open** (drop a file, choose one, or a URL), **Download**, **Save**
-  (writes straight to a file in Chromium browsers, Ctrl/⌘+S; elsewhere it downloads).
+- File menu: **Open** (drop a file, choose one, or a URL), **Save** (Ctrl/⌘+S: writes back to the file
+  when served by the [`c4` CLI](#the-c4-cli), else straight to a file in Chromium browsers, else downloads),
+  **Download**, **Copy link** (a link that carries the whole model) and **Design card…** (see
+  [Card and badge](#card-and-badge)).
   The source pane has its own **Copy to clipboard** button.
 - Four themes: Light, Dark, Blueprint and Warm.
 - Split view has a draggable divider (arrow keys too; double-click resets), remembered in the browser.
@@ -40,6 +42,7 @@ The full format, with a minimal and a complete example, is in **[spec.md](spec.m
 | --- | --- |
 | _(none)_ | The file saved in this browser, or the built-in sample. |
 | `?src=<url>` | That markdown file (absolute, or relative to the page). It is not autosaved, so it never overwrites your saved file. |
+| `#data=<packed>` | A model carried in the link itself (File → Copy link): the markdown, deflated and base64url-encoded. Not autosaved either. The other settings below still apply. |
 
 Add any of these to choose what shows (unknown values are ignored):
 
@@ -59,11 +62,64 @@ raw.githubusercontent.com do).
 ## Viewing locally
 
 ```sh
-make dev     # serves this folder on http://localhost:8000/ (python3) and prints the example's URL
-make test    # node check.mjs: parser round-trip and query-string handling
+make dev     # the c4 CLI on http://localhost:8000/ with the Acme example; File → Save writes it back
+make test    # node check.mjs: parser round-trip, query string, card/badge and share links
 ```
 
 There is no build step. Some browsers block the scripts over `file://`, so use `make dev`.
+
+## The `c4` CLI
+
+```sh
+bunx @pritzlaff/c4 architecture.md   # or npx; no install needed
+```
+
+It serves the viewer and that file on localhost (loopback only) and opens the browser. The file is
+re-read on each reload, and **File → Save** (Ctrl/⌘+S) writes your edits back to it.
+`PORT=8000` fixes the port; `NO_OPEN=1` skips opening a browser. The package has no dependencies: it is
+`bin/c4.mjs` plus the viewer files, and it uses the viewer's own parser from `Main.dc.html`.
+
+### Card and badge
+
+```sh
+c4 card architecture.md [out-dir]    # → card.json: the model as a dashboard card (data only)
+c4 badge architecture.md [out-dir]   # → badge.svg: drawn from the same card
+```
+
+`card.json` is tool-neutral data (title, a status pill, a big number, a legend with a count per element
+kind and for relationships, a source link) for a dashboard to style as it likes. The pill says how many
+elements are not yet placed in `# Layout`. What the card says (title, legend labels, colours, order, the
+big number) comes from an optional `architecture.card.json` beside the markdown (format in
+[spec.md](spec.md#card-settings)). Design it in the viewer with **File → Design card…**, which previews
+the card and badge and saves the file (when served by `c4`), downloads it, or keeps it in the browser.
+
+Links in the card open the viewer at `C4_HOST` (default `https://aaronp.github.io/c4/`) on `C4_SRC`
+(where your published markdown lives, default the path given); set both as environment variables. The
+Pages workflows here and in [examples/bun-app](examples/bun-app) regenerate both files on every push
+(`make card` here, `make snapshot` there), so a README can embed the live badge:
+
+```md
+[![Architecture](https://you.github.io/your-app/badge.svg)](https://you.github.io/your-app/)
+```
+
+### Adding it to your Bun project
+
+```sh
+bun add -d @pritzlaff/c4
+bun pm pkg set scripts.c4="c4 c4/architecture.md"
+mkdir -p c4 && printf '# Model: My app\n' > c4/architecture.md
+bun run c4
+```
+
+[examples/bun-app](examples/bun-app) is this setup end to end, including publishing `c4/` to GitHub Pages.
+
+### Releasing
+
+```sh
+make bump-patch    # or bump-minor / bump-major: npm version, which commits and tags v<version>
+make publish       # make test, then npm publish
+make dist          # the same package as a local .tgz, without publishing
+```
 
 ## Hosting
 
@@ -94,5 +150,7 @@ your `architecture.md`.
 | `Main.dc.html` | The whole app: markup, styles (theme tokens on `:root[data-theme]`) and the component logic. Originally a design-tool export; the inline styles carry the design values |
 | `support.js`, `vendor/react*.js` | The runtime that renders the component; not edited |
 | `check.mjs` | Smoke test run by `make test` and CI |
+| `bin/c4.mjs`, `package.json` | The `c4` CLI and the npm package (`@pritzlaff/c4`) |
 | `spec.md` | The markdown format |
 | `examples/acme-platform/` | A cloneable data-only repo that points back at this viewer |
+| `examples/bun-app/` | A Bun project with its own `c4/architecture.md`: `bun run c4` opens it locally, Pages publishes it |
