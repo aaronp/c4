@@ -209,6 +209,33 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .drop>svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .row{display:flex;gap:8px}
 .alert{padding:10px 14px;background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-text);border-radius:8px;font-size:13px;line-height:18px}
+/* Card designer */
+.modal.cd-dlg{width:min(980px,calc(100vw - 32px))}
+.cd-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.cd-grid{grid-template-columns:1fr}}
+.cd-form,.cd-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.cd-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cd-rows{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cd-rows legend{padding:0;margin-bottom:6px}
+.cd-row{display:grid;grid-template-columns:auto auto 9.5rem minmax(0,1fr) auto;gap:6px;align-items:center}
+.cd-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
+.cd-color{width:40px;height:36px;padding:2px;border:1px solid var(--ctl-line);border-radius:6px;background:var(--surface);cursor:pointer}
+.cd-card{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--surface-2);display:flex;flex-direction:column;gap:12px}
+.cd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.cd-names{display:flex;flex-direction:column;gap:2px}
+.cd-pill{font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--subtle);color:var(--text-2);white-space:nowrap}
+.cd-pill.good{color:var(--ok)}.cd-pill.warn{color:var(--warn)}.cd-pill.bad{color:var(--err)}
+.cd-primary{font-size:32px;font-weight:600;line-height:1}
+.cd-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--subtle)}
+.cd-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.cd-legend>span{display:inline-flex;align-items:center;gap:6px}
+.cd-sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.cd-foot{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line-2);padding-top:10px}
+.cd-foot .mono{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-foot a{color:var(--link)}
+.cd-badge{display:block;max-width:100%}
+.cd-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cd-note{margin:0;font-size:13px}.cd-note.ok{color:var(--ok)}.cd-note.bad{color:var(--err)}.cd-note.warn{color:var(--warn)}
 @media (pointer:coarse){.rename{opacity:1}.btn,.inp{min-height:44px}.seg button{min-height:40px}.chip{min-height:40px}.handle{width:30px;height:30px;right:-15px;margin-top:-15px;opacity:1}}
 @media (max-width:860px){.app{height:auto}.main,.main.split,.body{flex-wrap:wrap}.splitter{display:none}.pane-md{flex-basis:100% !important;height:50vh;border-right:0;border-bottom:1px solid var(--line)}.pane-dia{flex-basis:100%}.stage{min-height:70vh}.insp{border-left:0;border-top:1px solid var(--line)}}
 </style>
@@ -228,8 +255,10 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 <div class="menu-list" role="menu" onClick="{{onMenuPick}}">
 <button class="menu-item" role="menuitem" onClick="{{onNew}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M12 12v6M9 15h6"></path></svg>New</button>
 <button class="menu-item" role="menuitem" onClick="{{onOpenShow}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Open…</button>
-<button class="menu-item" role="menuitem" onClick="{{onSave}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M7 3v5h8V3"></path><rect x="7" y="13" width="10" height="8"></rect></svg>Save<kbd>Ctrl/⌘+S</kbd></button>
+<button class="menu-item" role="menuitem" onClick="{{onSave}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M7 3v5h8V3"></path><rect x="7" y="13" width="10" height="8"></rect></svg>{{saveLabel}}<kbd>Ctrl/⌘+S</kbd></button>
 <button class="menu-item" role="menuitem" onClick="{{onDownload}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 21h16"></path></svg>Download {{fileName}}</button>
+<button class="menu-item" role="menuitem" onClick="{{onCopyLink}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"></path><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>Copy link</button>
+<button class="menu-item" role="menuitem" onClick="{{onCardShow}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 15v-3M11 15V9M15 15v-5"></path></svg>Design card…</button>
 <div class="menu-sep" role="separator"></div>
 <a class="menu-item" role="menuitem" href="https://github.com/aaronp/c4" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg>Repo</a>
 </div>
@@ -247,7 +276,7 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 </div>
 
 <sc-if value="{{openDlg}}" hint-placeholder-val="{{ false }}">
-<dialog class="modal" aria-labelledby="open-h" onCancel="{{onOpenCancel}}" onClick="{{onOpenBackdrop}}">
+<dialog class="modal open-dlg" aria-labelledby="open-h" onCancel="{{onOpenCancel}}" onClick="{{onOpenBackdrop}}">
 <div class="modal-body">
 <div class="modal-h"><h2 id="open-h">Open a C4 markdown file</h2><button class="x" onClick="{{onOpenHide}}" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
 <div class="{{dropCls}}" onDragOver="{{onDragOver}}" onDragLeave="{{onDragLeave}}" onDrop="{{onDrop}}">
@@ -262,6 +291,67 @@ svg.ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 </form>
 <sc-if value="{{hasOpenErr}}" hint-placeholder-val="{{ false }}"><div class="alert" role="alert">{{openErr}}</div></sc-if>
 <div><button class="btn" onClick="{{onReset}}">Load the sample instead</button></div>
+</div>
+</dialog>
+</sc-if>
+
+<sc-if value="{{cardDlg}}" hint-placeholder-val="{{ false }}">
+<dialog class="modal cd-dlg" aria-labelledby="card-h" onCancel="{{onCardCancel}}" onClick="{{onCardBackdrop}}">
+<div class="modal-body">
+<div class="modal-h"><h2 id="card-h">Design card</h2><button class="x" onClick="{{onCardHide}}" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<p class="muted">What this model's dashboard card (<code>card.json</code>) and badge (<code>badge.svg</code>) say. Keep <code>{{cd.fileName}}</code> next to the markdown; <code>c4 card</code> and <code>c4 badge</code> read it.</p>
+<sc-if value="{{cd.loading}}" hint-placeholder-val="{{ false }}"><p class="muted">Loading…</p></sc-if>
+<sc-if value="{{cd.ready}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{cd.hasNotes}}" hint-placeholder-val="{{ false }}"><div class="alert" role="alert"><sc-for list="{{cd.notes}}" as="n" hint-placeholder-count="1"><div>{{n.text}}</div></sc-for></div></sc-if>
+<div class="cd-grid">
+<div class="cd-form">
+<div class="cd-pair">
+<div class="fld"><label for="cd-title">Title</label><input id="cd-title" class="inp" value="{{cd.title}}" placeholder="{{cd.titlePh}}" onChange="{{cd.onTitle}}"></div>
+<div class="fld"><label for="cd-sub">Subtitle</label><input id="cd-sub" class="inp" value="{{cd.subtitle}}" onChange="{{cd.onSubtitle}}"></div>
+</div>
+<div class="cd-pair">
+<div class="fld"><label for="cd-primary">Big number</label><select id="cd-primary" class="inp" value="{{cd.primary}}" onChange="{{cd.onPrimary}}"><sc-for list="{{cd.primaries}}" as="o" hint-placeholder-count="3"><option value="{{o.id}}">{{o.label}}</option></sc-for></select></div>
+<div class="fld"><label for="cd-label">Label</label><input id="cd-label" class="inp" value="{{cd.label}}" placeholder="{{cd.labelPh}}" onChange="{{cd.onLabel}}"></div>
+</div>
+<fieldset class="cd-rows">
+<legend class="lbl">Legend</legend>
+<label class="cd-check"><input type="checkbox" checked="{{cd.hideZero}}" onChange="{{cd.onHideZero}}"> Hide items with a count of 0</label>
+<sc-for list="{{cd.rows}}" as="r" hint-placeholder-count="6">
+<div class="cd-row">
+<button class="btn icon" onClick="{{r.up}}" disabled="{{r.first}}" aria-label="Move {{r.label}} up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></button>
+<button class="btn icon" onClick="{{r.down}}" disabled="{{r.last}}" aria-label="Move {{r.label}} down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<label class="cd-check"><input type="checkbox" checked="{{r.on}}" onChange="{{r.toggle}}"> <span class="mono">{{r.id}}</span></label>
+<input class="inp" aria-label="{{r.id}} label" value="{{r.label}}" onChange="{{r.onLabel}}">
+<input type="color" class="cd-color" aria-label="{{r.id}} colour" value="{{r.color}}" onChange="{{r.onColor}}">
+</div>
+</sc-for>
+</fieldset>
+<div class="fld"><label for="cd-source">Source label</label><input id="cd-source" class="inp mono" value="{{cd.sourceLabel}}" placeholder="{{cd.sourcePh}}" onChange="{{cd.onSource}}"></div>
+</div>
+<div class="cd-side">
+<span class="lbl">Card preview</span>
+<sc-if value="{{cd.noCard}}" hint-placeholder-val="{{ false }}"><p class="muted">Fix the markdown (it needs a valid <code># Model:</code>) to preview the card.</p></sc-if>
+<sc-if value="{{cd.hasCard}}" hint-placeholder-val="{{ true }}">
+<div class="cd-card">
+<div class="cd-top"><div class="cd-names"><b>{{cd.c.title}}</b><span class="muted">{{cd.c.subtitle}}</span></div><span class="{{cd.pillCls}}">{{cd.c.status.label}}</span></div>
+<div class="cd-heading"><span class="cd-primary">{{cd.c.heading.primary}}</span> <span class="muted">{{cd.c.heading.label}}</span></div>
+<div class="cd-bar"><sc-for list="{{cd.bar}}" as="b" hint-placeholder-count="3"><span style="flex: {{b.n}}; background: {{b.color}}" title="{{b.title}}"></span></sc-for></div>
+<div class="cd-legend"><sc-for list="{{cd.items}}" as="i" hint-placeholder-count="4"><span><span class="cd-sw" style="background: {{i.color}}"></span>{{i.label}} <b>{{i.n}}</b></span></sc-for></div>
+<div class="cd-foot"><span class="mono">{{cd.c.source.label}}</span><a href="{{cd.c.source.url}}" target="_blank" rel="noopener">Open →</a></div>
+</div>
+<span class="lbl">Badge</span>
+<div><img class="cd-badge" src="{{cd.badgeSrc}}" alt="Badge preview"></div>
+</sc-if>
+<div class="cd-actions">
+<sc-if value="{{cd.canSave}}" hint-placeholder-val="{{ false }}"><button class="btn primary" onClick="{{cd.onSave}}">Save {{cd.fileName}}</button></sc-if>
+<button class="btn" onClick="{{cd.onDownload}}">Download {{cd.fileName}}</button>
+<button class="btn" onClick="{{cd.onBadge}}" disabled="{{cd.noCard}}">Download badge.svg</button>
+<button class="btn" onClick="{{cd.onCopy}}" disabled="{{cd.noCard}}">Copy card.json</button>
+</div>
+<sc-if value="{{cd.hasNote}}" hint-placeholder-val="{{ false }}"><p class="cd-note {{cd.noteCls}}">{{cd.note}}</p></sc-if>
+</div>
+</div>
+</sc-if>
 </div>
 </dialog>
 </sc-if>
@@ -1197,6 +1287,134 @@ class Component extends DCLogic {
       throw new Error(`bug: unknown selection type "${sel.t}"`);
     }
 
+    // ---------- dashboard card and badge (pure) ----------
+    // card.json is a tool-neutral summary of the model: title, status pill, one big number, a legend with
+    // a count per item and a source link. What it says comes from an optional sidecar, <name>.card.json
+    // (checked by parsePrefs). Links open the hosted viewer (CARD_HOST, or the CLI's C4_HOST) on the markdown.
+    const CARD_HOST = 'https://aaronp.github.io/c4/';
+    const CARD_ITEMS = Object.freeze([
+      { id: 'people', label: 'People', color: '#08427B', kinds: ['Person', 'External Person'] },
+      { id: 'systems', label: 'Systems', color: '#1168BD', kinds: ['System'] },
+      { id: 'externals', label: 'External systems', color: '#5E6470', kinds: ['External'] },
+      { id: 'containers', label: 'Containers', color: '#3478C6', kinds: CONTAINER_KINDS },
+      { id: 'components', label: 'Components', color: '#2D6A9F', kinds: COMPONENT_KINDS },
+      { id: 'relationships', label: 'Relationships', color: '#7B4FA0', kinds: null },
+    ]);
+    const CARD_IDS = CARD_ITEMS.map((i) => i.id);
+    const sidecarOf = (path) => `${path.replace(/\.md$/i, '')}.card.json`;
+
+    // Throws on anything malformed; unknown legend ids are dropped with a warning (an older or newer file).
+    function parsePrefs(json) {
+      const isObj = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
+      const bad = (where, what) => { throw new Error(`${where}: ${what}`); };
+      const only = (o, keys, where) => Object.keys(o).forEach((k) => { if (!keys.includes(k)) bad(where, `unknown field "${k}"`); });
+      const str = (o, k, where) => { if (o[k] !== undefined && typeof o[k] !== 'string') bad(`${where}${k}`, 'expected a string'); return o[k]; };
+      const obj = (v, where) => { if (!isObj(v)) bad(where, 'expected an object'); return v; };
+      obj(json, '/');
+      only(json, ['title', 'subtitle', 'heading', 'legend', 'hideZero', 'source'], '/');
+      const warnings = [];
+      const prefs = {};
+      if (json.title !== undefined) prefs.title = str(json, 'title', '/');
+      if (json.subtitle !== undefined) prefs.subtitle = str(json, 'subtitle', '/');
+      if (json.hideZero !== undefined) { if (typeof json.hideZero !== 'boolean') bad('/hideZero', 'expected true or false'); prefs.hideZero = json.hideZero; }
+      if (json.heading !== undefined) {
+        const h = obj(json.heading, '/heading');
+        only(h, ['primary', 'label'], '/heading');
+        if (h.primary !== undefined && h.primary !== 'elements' && !CARD_IDS.includes(h.primary)) bad('/heading/primary', `expected one of: elements, ${CARD_IDS.join(', ')}`);
+        prefs.heading = { ...(h.primary !== undefined ? { primary: h.primary } : {}), ...(h.label !== undefined ? { label: str(h, 'label', '/heading/') } : {}) };
+      }
+      if (json.source !== undefined) {
+        const s = obj(json.source, '/source');
+        only(s, ['label'], '/source');
+        prefs.source = s.label !== undefined ? { label: str(s, 'label', '/source/') } : {};
+      }
+      if (json.legend !== undefined) {
+        if (!Array.isArray(json.legend)) bad('/legend', 'expected a list');
+        prefs.legend = json.legend.flatMap((l, i) => {
+          const where = `/legend/${i}`;
+          obj(l, where);
+          if (!CARD_IDS.includes(l.id)) { warnings.push(`Unknown legend id "${String(l.id)}" (expected one of: ${CARD_IDS.join(', ')})`); return []; }
+          only(l, ['id', 'label', 'color'], where);
+          return [{ id: l.id, ...(l.label !== undefined ? { label: str(l, 'label', `${where}/`) } : {}), ...(l.color !== undefined ? { color: str(l, 'color', `${where}/`) } : {}) }];
+        });
+      }
+      return { prefs, warnings };
+    }
+
+    // `at.label` is the default source label (the markdown path); `at.src` is what the viewer fetches (?src=),
+    // a URL or a path relative to `host`.
+    function card(doc, prefs, today, at, host = CARD_HOST) {
+      const model = modelOf(doc);
+      if (model === null) throw new Error('there is no "# Model:" section');
+      const idx = index(model);
+      const els = [...idx.values()].map((v) => v.el);
+      const item = (id) => CARD_ITEMS.find((i) => i.id === id);
+      const count = (id) => { const it = item(id); return it.kinds === null ? els.reduce((a, e) => a + e.rels.length, 0) : els.filter((e) => it.kinds.includes(e.kind)).length; };
+      const open = `${host}?src=${encodeURIComponent(at.src).replace(/%2F/gi, '/').replace(/%3A/gi, ':')}`;
+      const legend = (prefs.legend ?? CARD_ITEMS.map((i) => ({ id: i.id })))
+        .filter((l) => !prefs.hideZero || count(l.id) > 0)
+        .map((l) => ({ id: l.id, label: l.label ?? item(l.id).label, color: l.color ?? item(l.id).color }));
+      const layout = layoutOf(doc);
+      const placed = new Set(layout === null ? [] : layout.entries.map((e) => e.path));
+      const unplaced = [...idx.keys()].filter((p) => !placed.has(p)).length;
+      const primary = prefs.heading?.primary ?? 'elements';
+      return {
+        version: 1,
+        title: prefs.title ?? model.title,
+        subtitle: prefs.subtitle ?? 'C4 model',
+        status: unplaced > 0 ? { label: `${unplaced} unplaced`, tone: 'warn', url: open } : { label: 'Laid out', tone: 'good' },
+        heading: { primary: String(primary === 'elements' ? els.length : count(primary)), label: prefs.heading?.label ?? (primary === 'elements' ? 'elements' : item(primary).label.toLowerCase()) },
+        legend,
+        report: Object.fromEntries(legend.map((l) => [l.id, count(l.id)])),
+        source: { label: prefs.source?.label ?? at.label, url: open },
+        updated: today,
+      };
+    }
+
+    // A shields.io-style badge from a card: ( Title | People 2 | Systems 3 ), non-zero items only.
+    function badgeSvg(c) {
+      // ~7px a character for 11px Verdana; emoji a little wider.
+      const width = (t) => [...t].reduce((w, ch) => w + (/\p{Extended_Pictographic}/u.test(ch) ? 14 : /️/.test(ch) ? 0 : 7), 0) + 12;
+      const esc = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const items = c.legend.map((l) => ({ ...l, n: c.report[l.id] ?? 0 })).filter((l) => l.n > 0);
+      const parts = [{ text: c.title, bg: '#555' }, ...items.map((l) => ({ text: `${l.label} ${l.n}`, bg: l.color ?? '#6B7280' }))];
+      let x = 0;
+      const segs = parts.map((p) => {
+        const w = width(p.text);
+        const seg = `<rect x="${x}" width="${w}" height="20" fill="${esc(p.bg)}"/><text x="${x + w / 2}" y="14" fill="#fff">${esc(p.text)}</text>`;
+        x += w;
+        return seg;
+      });
+      const title = esc(`${c.title}: ${items.length === 0 ? 'empty' : items.map((l) => `${l.n} ${l.label.toLowerCase()}`).join(', ')}`);
+      return [
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${x}" height="20" role="img" aria-label="${title}">`,
+        `<title>${title}</title>`,
+        `<clipPath id="r"><rect width="${x}" height="20" rx="7"/></clipPath>`,
+        '<g clip-path="url(#r)" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">',
+        ...segs,
+        '</g>',
+        '</svg>',
+        '',
+      ].join('\n');
+    }
+
+    // ---------- a whole model in a link (#data=): deflate-raw, base64url ----------
+    const pipeBytes = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+    async function packMd(md) {
+      const bytes = await pipeBytes(new TextEncoder().encode(md), new CompressionStream('deflate-raw'));
+      let bin = '';
+      for (const b of bytes) bin += String.fromCharCode(b);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    async function unpackMd(packed) {
+      try {
+        const bin = atob(packed.replace(/-/g, '+').replace(/_/g, '/'));
+        return new TextDecoder().decode(await pipeBytes(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)), new DecompressionStream('deflate-raw')));
+      } catch (err) {
+        throw new Error('the shared link is damaged or incomplete');
+      }
+    }
+
     const SAMPLE = [
       'Acme trading platform',
       '',
@@ -1313,6 +1531,7 @@ class Component extends DCLogic {
       parse, tryParse, serialize,
       THEME_IDS, moveTo, setProp, setSlug, setPropAndSlug, mdToHtml, addElement, removeElement, addRel, setRel, removeRel, removeRels, setTags, allTags, setTitle, setTheme, createModel,
       arrange, unpush, edges, hitTest, locate, selLines, search,
+      CARD_HOST, CARD_ITEMS, sidecarOf, parsePrefs, card, badgeSvg, packMd, unpackMd,
       SAMPLE,
     });
   })();
@@ -1429,6 +1648,15 @@ class Component extends DCLogic {
     drafts: {},
     note: null,
     save: 'pending',
+    // The ?src= file's server takes a PUT back (the `c4` CLI sends x-c4-writable), so Save writes it.
+    writable: false,
+    // Opened from a #data= link: like ?src=, never autosaved over the copy kept in this browser.
+    shared: false,
+    // Card designer dialog: `cardDesign` is null while its settings load.
+    cardDlg: false,
+    cardDesign: null,
+    cardNotes: [],
+    cardWritable: false,
     // Undo history: whole markdown snapshots. `histGroup` lets a burst of related edits
     // (typing, one drag, one field) collapse into a single undo step.
     past: [],
@@ -1532,7 +1760,19 @@ class Component extends DCLogic {
       this.setZoom(this.state.zoom * Math.exp(-Math.max(-50, Math.min(50, e.deltaY)) / 100), e.clientX, e.clientY);
     };
     document.addEventListener('wheel', this._onWheel, { passive: false });
-    if (this.state.srcUrl !== null) this.loadSrc(this.state.srcUrl); else this.loadStored();
+    const packed = new URLSearchParams(window.location.hash.slice(1)).get('data');
+    if (packed !== null) this.loadShared(packed);
+    else if (this.state.srcUrl !== null) this.loadSrc(this.state.srcUrl);
+    else this.loadStored();
+  }
+
+  // #data=<packed> (File → Copy link): the whole model carried in the link.
+  loadShared(packed) {
+    Component.lib.unpackMd(packed).then(
+      // The link's own ?sel= and ?open= still apply.
+      (md) => { this.loadMd(md, 'architecture.md', null, 'Opened a shared link', { shared: true, sel: this.state.sel, expanded: this.state.expanded }); this.setState({ past: [], future: [] }); },
+      (err) => { this.loadStored(); this.flash(`Could not open the shared link: ${err.message}`, 'bad'); },
+    );
   }
 
   componentWillUnmount() { window.removeEventListener('popstate', this._onPop); document.removeEventListener('pointerdown', this._onDocDown); document.removeEventListener('wheel', this._onWheel); }
@@ -1553,7 +1793,7 @@ class Component extends DCLogic {
     this.flash(`Loading ${raw}…`, 'warn');
     this.fetchMd(raw).then(
       // The link's own document is where history starts, so it is not undoable.
-      ({ url, md }) => { this.loadMd(md, url.split('/').pop() || 'architecture.md', raw, `Opened ${url}`); this.setState({ past: [], future: [] }); },
+      ({ url, md, writable }) => { this.loadMd(md, url.split('/').pop() || 'architecture.md', raw, `Opened ${url}`, { writable }); this.setState({ past: [], future: [] }); },
       (err) => { this.setState({ srcUrl: null }); this.loadStored(); this.flash(`Could not load ${raw}: ${err.message}`, 'bad'); },
     );
   }
@@ -1573,7 +1813,7 @@ class Component extends DCLogic {
     const s = this.state;
     const prevState = this._prev;
     this._prev = s;
-    if (prevState.md !== s.md && s.save !== 'unavailable' && s.srcUrl === null) this.persist(s.md);
+    if (prevState.md !== s.md && s.save !== 'unavailable' && s.srcUrl === null && !s.shared) this.persist(s.md);
     document.documentElement.dataset.theme = this.themeOf();
     const q = Component.toQuery(s, window.location.search);
     if (q !== window.location.search) {
@@ -1581,7 +1821,10 @@ class Component extends DCLogic {
       const step = prevState.view !== s.view || prevState.mode !== s.mode || prevState.srcUrl !== s.srcUrl || JSON.stringify(prevState.sel) !== JSON.stringify(s.sel);
       window.history[step ? 'pushState' : 'replaceState'](null, '', q + window.location.hash);
     }
-    if (s.openDlg && !prevState.openDlg) document.querySelector('dialog.modal')?.showModal();
+    if (s.openDlg && !prevState.openDlg) document.querySelector('dialog.open-dlg')?.showModal();
+    if (s.cardDlg && !prevState.cardDlg) document.querySelector('dialog.cd-dlg')?.showModal();
+    // Leaving a shared model drops its #data= so a reload does not bring it back.
+    if (prevState.shared && !s.shared) window.history.replaceState(null, '', window.location.pathname + window.location.search);
     if (this._anchor !== undefined && prevState.zoom !== s.zoom) {
       const a = this._anchor;
       this._anchor = undefined;
@@ -1741,15 +1984,25 @@ class Component extends DCLogic {
 
   // navigator.clipboard needs a secure context (https or localhost) and may be blocked in iframes;
   // execCommand('copy') on a temporary textarea covers file:// and plain http.
-  onCopy = () => {
-    const done = (ok, why) => {
-      this.setState({ copyLabel: ok ? 'Copied' : 'Copy failed', note: { text: ok ? 'Markdown copied' : `Copy failed: ${why}; select the text and copy it instead`, tone: ok ? 'ok' : 'bad' } });
-      window.clearTimeout(this._copyT);
-      this._copyT = window.setTimeout(() => this.setState({ copyLabel: 'Copy to clipboard' }), 1500);
-    };
+  onCopy = () => this.copyText(this.state.md, (ok, why) => {
+    this.setState({ copyLabel: ok ? 'Copied' : 'Copy failed', note: { text: ok ? 'Markdown copied' : `Copy failed: ${why}; select the text and copy it instead`, tone: ok ? 'ok' : 'bad' } });
+    window.clearTimeout(this._copyT);
+    this._copyT = window.setTimeout(() => this.setState({ copyLabel: 'Copy to clipboard' }), 1500);
+  });
+
+  // A link carrying the whole model (#data=), plus the view settings; ?src= is dropped since the data is inline.
+  onCopyLink = () => {
+    const s = this.state;
+    Component.lib.packMd(s.md).then((packed) => {
+      const link = `${window.location.origin}${window.location.pathname}${Component.toQuery({ ...s, srcUrl: null }, '')}#data=${packed}`;
+      this.copyText(link, (ok, why) => this.flash(ok ? `Link copied (${Math.ceil(link.length / 1024)} KB): it carries the whole model` : `Copy failed: ${why}`, ok ? 'ok' : 'bad'));
+    }, (err) => this.flash(`Could not make a link: ${err.message}`, 'bad'));
+  };
+
+  copyText(text, done) {
     const fallback = (why) => {
       const ta = document.createElement('textarea');
-      ta.value = this.state.md;
+      ta.value = text;
       ta.setAttribute('readonly', '');
       ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
       document.body.appendChild(ta);
@@ -1760,11 +2013,12 @@ class Component extends DCLogic {
       done(ok, why);
     };
     if (navigator.clipboard === undefined || !window.isSecureContext) { fallback('the clipboard is not available here'); return; }
-    navigator.clipboard.writeText(this.state.md).then(() => done(true, ''), (err) => fallback(err.message));
-  };
+    navigator.clipboard.writeText(text).then(() => done(true, ''), (err) => fallback(err.message));
+  }
 
   // Replaces the document (undoable). srcUrl is where it came from, or null for a local file / the sample.
-  loadMd(raw, fileName, srcUrl, label) {
+  // `extra` may set `writable` (Save PUTs back to srcUrl) or `shared` (from a #data= link); both default to off.
+  loadMd(raw, fileName, srcUrl, label, extra = {}) {
     const md = raw.replace(/\r\n?/g, '\n');
     const res = this.parsedOf(md);
     this._handle = undefined;
@@ -1773,14 +2027,21 @@ class Component extends DCLogic {
       // A ?src= link may already say what to select and expand; anything else starts fresh.
       ...(srcUrl !== null && srcUrl === this.state.srcUrl ? {} : { expanded: [], sel: null }),
       fileName, srcUrl, openDlg: false, openBusy: false, openErr: null, dragging: false, note: { text: label, tone: 'ok' },
+      writable: false, shared: false, ...extra,
     });
   }
 
+  // `writable`: the server (the `c4` CLI) takes a PUT of the file back to this URL.
   async fetchMd(raw) {
     const url = new URL(raw, window.location.href);
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return { url: url.href, md: await res.text() };
+    return { url: url.href, md: await res.text(), writable: res.headers.get('x-c4-writable') === '1' };
+  }
+
+  async putText(url, text, type) {
+    const res = await fetch(url, { method: 'PUT', body: text, headers: { 'content-type': `${type};charset=utf-8` } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`);
   }
 
   openFile(file) {
@@ -1833,27 +2094,40 @@ class Component extends DCLogic {
     if (raw === '' || this.state.openBusy) return;
     this.setState({ openBusy: true, openErr: null });
     this.fetchMd(raw).then(
-      ({ url, md }) => this.loadMd(md, url.split('/').pop() || 'architecture.md', url, `Opened ${url}`),
+      ({ url, md, writable }) => this.loadMd(md, url.split('/').pop() || 'architecture.md', url, `Opened ${url}`, { writable }),
       (err) => this.setState({ openBusy: false, openErr: `Could not open ${raw}: ${err.message}` }),
     );
   };
 
   // ---------- download / save ----------
-  onDownload = () => {
-    const url = URL.createObjectURL(new Blob([this.state.md], { type: 'text/markdown;charset=utf-8' }));
+  downloadText(fileName, text, mime) {
+    const url = URL.createObjectURL(new Blob([text], { type: `${mime};charset=utf-8` }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = this.state.fileName;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     a.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    this.flash(`Downloaded ${this.state.fileName}`, 'ok');
-  };
+    this.flash(`Downloaded ${fileName}`, 'ok');
+  }
+
+  onDownload = () => this.downloadText(this.state.fileName, this.state.md, 'text/markdown');
 
   // Writes to a file on disk where the browser allows it (Chromium), asking where only the first time;
   // elsewhere it falls back to a download.
   onSave = async () => {
+    const s = this.state;
+    if (s.writable && s.srcUrl !== null) {
+      // Served by the `c4` CLI: write straight back to the file it came from.
+      try {
+        await this.putText(new URL(s.srcUrl, window.location.href).href, s.md, 'text/markdown');
+        this.flash(`Saved ${s.fileName}`, 'ok');
+      } catch (err) {
+        this.flash(`Save failed: ${err.message}; Download keeps a copy`, 'bad');
+      }
+      return;
+    }
     if (typeof window.showSaveFilePicker !== 'function') { this.onDownload(); return; }
     try {
       if (this._handle === undefined) {
@@ -1868,6 +2142,166 @@ class Component extends DCLogic {
       this._handle = undefined;
       this.flash(`Save failed: ${err.message}`, 'bad');
     }
+  };
+
+  // ---------- card designer: edits <name>.card.json, what the model's card.json and badge.svg say ----------
+  static CARD_KEY = 'c4-markdown-viewer:card';
+
+  // Where the sidecar lives: beside ?src= (architecture.md → architecture.card.json), or null for browser storage.
+  cardUrl() {
+    const s = this.state;
+    if (s.srcUrl === null) return null;
+    const u = new URL(s.srcUrl, window.location.href);
+    u.pathname = Component.lib.sidecarOf(u.pathname);
+    return u.href;
+  }
+
+  // The designer edits every legend item, in order, with `on` for the ones shown.
+  static designOf(prefs) {
+    const L = Component.lib;
+    const listed = prefs.legend ?? L.CARD_ITEMS.map((i) => ({ id: i.id }));
+    const ids = [...listed.map((l) => l.id), ...L.CARD_ITEMS.map((i) => i.id).filter((id) => !listed.some((l) => l.id === id))];
+    return {
+      title: prefs.title ?? null, subtitle: prefs.subtitle ?? 'C4 model', primary: prefs.heading?.primary ?? 'elements', label: prefs.heading?.label ?? null,
+      hideZero: prefs.hideZero === true, sourceLabel: prefs.source?.label ?? null,
+      rows: ids.map((id) => {
+        const l = listed.find((x) => x.id === id);
+        const d = L.CARD_ITEMS.find((i) => i.id === id);
+        return { id, on: l !== undefined, label: l?.label ?? d.label, color: l?.color ?? d.color };
+      }),
+    };
+  }
+
+  // Blank title, label or source mean "the default" (model title, item name, file path), so they stay out of the file.
+  static prefsOf(d) {
+    const opt = (k, v) => (v === null || v.trim() === '' ? {} : { [k]: v.trim() });
+    return {
+      ...opt('title', d.title), subtitle: d.subtitle,
+      heading: { primary: d.primary, ...opt('label', d.label) },
+      legend: d.rows.filter((r) => r.on).map((r) => ({ id: r.id, label: r.label, color: r.color })),
+      ...(d.hideZero ? { hideZero: true } : {}),
+      ...(d.sourceLabel === null || d.sourceLabel.trim() === '' ? {} : { source: { label: d.sourceLabel.trim() } }),
+    };
+  }
+
+  onCardShow = () => {
+    const url = this.cardUrl();
+    this.setState({ cardDlg: true, cardDesign: null, cardNotes: [], cardWritable: false, note: null });
+    const load = (text, where, writable, notes) => {
+      let prefs = {};
+      if (text !== null) {
+        try {
+          const r = Component.lib.parsePrefs(JSON.parse(text));
+          prefs = r.prefs;
+          notes = [...notes, ...r.warnings.map((w) => `${where}: ${w}`)];
+        } catch (err) {
+          notes = [...notes, `${where}: ${err.message}. Using the defaults.`];
+        }
+      }
+      this.setState({ cardDesign: Component.designOf(prefs), cardNotes: notes, cardWritable: writable });
+    };
+    if (url === null) {
+      let text = null;
+      try { text = window.localStorage.getItem(Component.CARD_KEY); } catch (err) { text = null; }
+      load(text, 'Saved card settings', false, []);
+      return;
+    }
+    // A missing sidecar is normal (the defaults apply); the `c4` CLI still marks it writable so Save can create it.
+    fetch(url, { cache: 'no-store' }).then(
+      async (res) => {
+        const writable = res.headers.get('x-c4-writable') === '1';
+        if (res.ok) load(await res.text(), url, writable, []);
+        else load(null, url, writable, res.status === 404 ? [] : [`Could not load ${url}: HTTP ${res.status}. Using the defaults.`]);
+      },
+      (err) => load(null, url, false, [`Could not load ${url}: ${err.message}. Using the defaults.`]),
+    );
+  };
+  onCardHide = () => this.setState({ cardDlg: false });
+  onCardCancel = (e) => { e.preventDefault(); this.onCardHide(); };
+  onCardBackdrop = (e) => { if (e.target === e.currentTarget) this.onCardHide(); };
+
+  // Without a ?src= the settings live in this browser, saved as you edit.
+  setCard(patch) {
+    const d = { ...this.state.cardDesign, ...patch };
+    this.setState({ cardDesign: d });
+    if (this.state.srcUrl !== null) return;
+    try { window.localStorage.setItem(Component.CARD_KEY, JSON.stringify(Component.prefsOf(d))); } catch (err) { /* Download still keeps them */ }
+  }
+  setCardRow(i, patch) { this.setCard({ rows: this.state.cardDesign.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) }); }
+  moveCardRow(i, by) {
+    const rows = [...this.state.cardDesign.rows];
+    const [r] = rows.splice(i, 1);
+    rows.splice(i + by, 0, r);
+    this.setCard({ rows });
+  }
+
+  // The card for the current markdown under the current design, its badge and the sidecar's file name.
+  cardView() {
+    const s = this.state;
+    const c = this.current();
+    const L = Component.lib;
+    const prefs = Component.prefsOf(s.cardDesign);
+    const src = s.srcUrl === null ? s.fileName : new URL(s.srcUrl, window.location.href).href;
+    const label = s.srcUrl ?? s.fileName;
+    const model = c.ok ? L.modelOf(c.doc) : null;
+    const theCard = model === null ? null : L.card(c.doc, prefs, new Date().toLocaleDateString('en-CA'), { label, src });
+    return { prefs, card: theCard, badge: theCard === null ? '' : L.badgeSvg(theCard), fileName: L.sidecarOf(s.fileName), modelTitle: model === null ? '' : model.title, label };
+  }
+
+  // Template props for the designer dialog.
+  cardProps() {
+    const s = this.state;
+    const d = s.cardDesign;
+    if (d === null) return { loading: true, ready: false };
+    const L = Component.lib;
+    const v = this.cardView();
+    const c = v.card;
+    const items = c === null ? [] : c.legend.map((l) => ({ label: l.label, color: l.color, n: c.report[l.id] }));
+    const rowsN = d.rows.length;
+    return {
+      loading: false, ready: true,
+      notes: s.cardNotes.map((text) => ({ text })), hasNotes: s.cardNotes.length > 0,
+      title: d.title ?? '', titlePh: v.modelTitle, subtitle: d.subtitle, label: d.label ?? '', sourceLabel: d.sourceLabel ?? '', sourcePh: v.label,
+      labelPh: d.primary === 'elements' ? 'elements' : L.CARD_ITEMS.find((i) => i.id === d.primary).label.toLowerCase(),
+      primaries: [{ id: 'elements', label: 'All elements' }, ...L.CARD_ITEMS.map((i) => ({ id: i.id, label: i.label }))].map((o) => ({ ...o, on: o.id === d.primary })),
+      hideZero: d.hideZero, primary: d.primary,
+      onTitle: (e) => this.setCard({ title: e.target.value }),
+      onSubtitle: (e) => this.setCard({ subtitle: e.target.value }),
+      onPrimary: (e) => this.setCard({ primary: e.target.value }),
+      onLabel: (e) => this.setCard({ label: e.target.value }),
+      onSource: (e) => this.setCard({ sourceLabel: e.target.value }),
+      onHideZero: (e) => this.setCard({ hideZero: e.target.checked }),
+      rows: d.rows.map((r, i) => ({
+        ...r, first: i === 0, last: i === rowsN - 1,
+        toggle: (e) => this.setCardRow(i, { on: e.target.checked }),
+        onLabel: (e) => this.setCardRow(i, { label: e.target.value }),
+        onColor: (e) => this.setCardRow(i, { color: e.target.value.toUpperCase() }),
+        up: () => this.moveCardRow(i, -1), down: () => this.moveCardRow(i, 1),
+      })),
+      hasCard: c !== null, noCard: c === null,
+      c: c ?? { title: '', subtitle: '', status: { label: '' }, heading: { primary: '', label: '' }, source: { label: '', url: '' } },
+      pillCls: c === null ? 'cd-pill' : `cd-pill ${c.status.tone}`,
+      items, bar: items.filter((i) => i.n > 0).map((i) => ({ ...i, title: `${i.label} ${i.n}` })),
+      badgeSrc: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(v.badge)}`,
+      fileName: v.fileName, canSave: s.cardWritable,
+      onDownload: this.onCardDownload, onBadge: this.onCardBadge, onCopy: this.onCardCopy, onSave: this.onCardSave,
+      hasNote: s.note !== null, note: s.note === null ? '' : s.note.text, noteCls: s.note === null ? '' : s.note.tone,
+    };
+  }
+
+  onCardDownload = () => { const v = this.cardView(); this.downloadText(v.fileName, `${JSON.stringify(v.prefs, null, 2)}\n`, 'application/json'); };
+  onCardBadge = () => { const v = this.cardView(); if (v.card !== null) this.downloadText('badge.svg', v.badge, 'image/svg+xml'); };
+  onCardCopy = () => {
+    const v = this.cardView();
+    if (v.card === null) return;
+    this.copyText(`${JSON.stringify(v.card, null, 2)}\n`, (ok, why) => this.flash(ok ? 'card.json copied' : `Copy failed: ${why}`, ok ? 'ok' : 'bad'));
+  };
+  onCardSave = () => {
+    const v = this.cardView();
+    this.putText(this.cardUrl(), `${JSON.stringify(v.prefs, null, 2)}\n`, 'application/json').then(
+      () => this.flash(`Saved ${v.fileName}`, 'ok'),
+      (err) => this.flash(`Saving ${v.fileName} failed: ${err.message}`, 'bad'),
+    );
   };
 
   // ---------- split view divider ----------
@@ -2320,6 +2754,9 @@ class Component extends DCLogic {
       md: s.md, lines, scrollTop: s.scrollTop,
       onMdChange: this.onMdChange, onCaret: this.onCaret, onTaScroll: this.onTaScroll,
       onCopy: this.onCopy, copyLabel: s.copyLabel, onImport: this.onImport, onReset: this.onReset, onDownload: this.onDownload, onSave: this.onSave,
+      onCopyLink: this.onCopyLink, saveLabel: s.writable && s.srcUrl !== null ? `Save ${s.fileName}` : 'Save',
+      cardDlg: s.cardDlg, onCardShow: this.onCardShow, onCardHide: this.onCardHide, onCardCancel: this.onCardCancel, onCardBackdrop: this.onCardBackdrop,
+      cd: s.cardDlg ? this.cardProps() : { loading: true, ready: false },
       fileName: s.fileName,
       themes: Component.THEMES.map((t) => ({ ...t, on: t.id === theme, cls: t.id === theme ? 'theme-btn on' : 'theme-btn', pick: () => this.pickTheme(t.id) })),
       isSplit: s.view === 'split', mainCls: s.view === 'split' ? 'main split' : 'main', mdW: s.mdW,
@@ -2352,7 +2789,7 @@ class Component extends DCLogic {
         counts,
         hasAuto: geo !== null && geo.autoCount > 0,
         auto: geo === null ? '' : `${geo.autoCount} auto-placed (drag to pin)`,
-        save: s.srcUrl !== null ? 'From a link, so not saved in this browser; Save or Download to keep changes' : s.save === 'saved' ?'Saved in this browser' : s.save === 'unavailable' ? 'Not saved: browser storage is unavailable here; copy the markdown to keep it' : 'Saving…',
+        save: s.writable && s.srcUrl !== null ? `Served locally: Save (Ctrl/⌘+S) writes ${s.fileName}` : s.srcUrl !== null || s.shared ? 'From a link, so not saved in this browser; Save or Download to keep changes' : s.save === 'saved' ?'Saved in this browser' : s.save === 'unavailable' ? 'Not saved: browser storage is unavailable here; copy the markdown to keep it' : 'Saving…',
         hasNote: s.note !== null, note: s.note === null ? '' : s.note.text,
         noteCls: s.note === null ? '' : s.note.tone,
       },

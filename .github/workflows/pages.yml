@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 22
       - run: node check.mjs
+      - run: |   # → examples/acme-platform/card.json and badge.svg
+          node bin/c4.mjs card examples/acme-platform/architecture.md
+          node bin/c4.mjs badge examples/acme-platform/architecture.md
       - name: Assemble the site
         run: |
           mkdir _site

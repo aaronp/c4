@@ -126,3 +126,32 @@ automatically and flagged **auto** until you drag them.
 
 [`examples/acme-platform/architecture.md`](examples/acme-platform/architecture.md) uses every
 element kind, nested relationships that roll up, and a layout. It is also the viewer's built-in sample.
+
+## Card settings
+
+`c4 card` and `c4 badge` (and **File → Design card…**) read an optional `<name>.card.json` beside the
+markdown (`architecture.md` → `architecture.card.json`). Every field is optional:
+
+```json
+{
+  "title": "Acme Trading",
+  "subtitle": "C4 model",
+  "heading": { "primary": "containers", "label": "containers" },
+  "legend": [
+    { "id": "systems", "label": "Systems", "color": "#1168BD" },
+    { "id": "containers" }
+  ],
+  "hideZero": true,
+  "source": { "label": "architecture.md" }
+}
+```
+
+| Field | Default |
+| --- | --- |
+| `title` | The model's title |
+| `heading.primary` | `elements` (all of them), or one of the legend ids |
+| `legend` | All of `people`, `systems`, `externals`, `containers`, `components`, `relationships`, in that order. Listed ids are shown in the order given; unknown ids are dropped with a warning |
+| `hideZero` | `false`: when `true`, legend items with a count of 0 are left out |
+| `source.label` | The markdown's path |
+
+Any other field is an error.

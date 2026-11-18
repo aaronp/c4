@@ -1,0 +1,12 @@
+{
+  "name": "bun-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun index.ts",
+    "c4": "c4 c4/architecture.md"
+  },
+  "devDependencies": {
+    "@pritzlaff/c4": "^0.1.0"
+  }
+}
