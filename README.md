@@ -6,6 +6,53 @@ their relationships and the layout. Edit the markdown or the diagram; each updat
 **[▶ Open the viewer](https://aaronp.github.io/c4/)** ·
 [Acme example](https://aaronp.github.io/c4/?src=examples/acme-platform/architecture.md)
 
+## Adding it to your project
+
+From your project's root (Bun shown; `npm i -D`, `npm pkg set` and `npm run` work the same):
+
+```sh
+bun add -d @pritzlaff/c4
+bun pm pkg set scripts.c4="c4 docs/architecture/c4.md"
+mkdir -p docs/architecture
+cat > docs/architecture/c4.md <<'EOF'
+# Model: My app
+
+## Person: Customer
+- slug: customer
+- uses → app.web: places orders [HTTPS]
+
+## System: My app
+- slug: app
+- desc: What the team builds and runs
+
+### Container: Web app
+- slug: web
+- tech: TypeScript, Bun
+- tags: frontend
+- reads → app.db: orders [SQL]
+- calls → payments: takes payments [REST/HTTPS]
+
+### Database: Orders DB
+- slug: db
+- tech: Postgres
+
+## External: Payments provider
+- slug: payments
+EOF
+bun run c4    # opens it on localhost
+```
+
+**File → Save** writes diagram and markdown edits back to `docs/architecture/c4.md`; commit it like any
+other source. Boxes without a `# Layout` line are placed automatically until you drag them, and the
+viewer writes their positions back. The full format is in **[spec.md](spec.md)**, also published at <https://aaronp.github.io/c4/spec.md> and shipped in the package as `node_modules/@pritzlaff/c4/spec.md`, so people and agents working in your repo can read the version they run.
+
+`c4 card docs/architecture/c4.md` and `c4 badge docs/architecture/c4.md` write `card.json` and
+`badge.svg` beside it, for a dashboard or a README badge ([Card and badge](#card-and-badge)).
+To publish it on GitHub Pages as well, copy `c4/index.html` and `.github/workflows/pages.yml` from
+[examples/bun-app](examples/bun-app), which is this setup end to end with the file in `c4/`
+(change that path in the workflow to match yours).
+[aaronp/template](https://github.com/aaronp/template) is a project with this and its sibling tools (goals, architecture, decisions, risks, schedule, delivery) set up together behind one dashboard.
+
 - **Source / Split / Chart** views; **Edit** (drag, connect, inspector) or **Present** mode.
 - Expand a system or container to drill in; relationships roll up to whatever is visible.
 - Search and tag filter: matches are highlighted (dashed when hidden inside a collapsed box); pick one to expand to it.
@@ -101,17 +148,6 @@ Pages workflows here and in [examples/bun-app](examples/bun-app) regenerate both
 ```md
 [![Architecture](https://you.github.io/your-app/badge.svg)](https://you.github.io/your-app/)
 ```
-
-### Adding it to your Bun project
-
-```sh
-bun add -d @pritzlaff/c4
-bun pm pkg set scripts.c4="c4 c4/architecture.md"
-mkdir -p c4 && printf '# Model: My app\n' > c4/architecture.md
-bun run c4
-```
-
-[examples/bun-app](examples/bun-app) is this setup end to end, including publishing `c4/` to GitHub Pages.
 
 ### Releasing
 

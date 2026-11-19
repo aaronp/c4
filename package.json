@@ -15,7 +15,8 @@
     "bin",
     "Main.dc.html",
     "support.js",
-    "vendor"
+    "vendor",
+    "spec.md"
   ],
   "engines": {
     "node": ">=18"
